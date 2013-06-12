@@ -61,7 +61,7 @@
             };
         }
 
-        internal virtual void SetVirtualPath(string value)
+        internal void SetVirtualPath(string value)
         {
             _VirtualPath = value;
         }

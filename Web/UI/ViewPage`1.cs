@@ -1,7 +1,4 @@
-﻿using System.Collections.Specialized;
-using System.Extensions;
-
-namespace System.Web.UI
+﻿namespace System.Web.UI
 {
     /// <summary>
     /// 表示包含有ViewData和ViewModel属性的WebForm强类型视图页面

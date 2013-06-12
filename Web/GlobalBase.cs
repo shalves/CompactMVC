@@ -18,11 +18,10 @@ namespace System.Web
             if (hc == null || string.IsNullOrEmpty(hc.Value)) return false;
             try
             {
-                hc.Domain = FormsAuthentication.CookieDomain;
                 FormsAuthenticationTicket ticket = FormsAuthentication.Decrypt(hc.Value);
                 FormsIdentity formsID = new FormsIdentity(ticket);
-                var cookieData = HttpUtility.ParseQueryString(ticket.UserData);
-                string[] userRoles = cookieData["roles"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                NameValueCollection userData = HttpUtility.ParseQueryString(ticket.UserData);
+                string[] userRoles = userData["roles"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 user = new GenericPrincipal(formsID, userRoles);
                 return true;
             }

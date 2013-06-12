@@ -7,7 +7,8 @@
     public abstract class ActionAttribute : Attribute
     {
         /// <summary>
-        /// 获取一个值，表示该标记规则判定失败后，应用程序是否应抛出异常从而中止执行
+        /// 获取一个值，表示如果该标记规则验证失败是否会导致致命错误
+        /// <para>当标记验证失败，应优先判断该值。当值为True时，应用程序应抛出异常中止执行</para>
         /// </summary>
         public abstract bool IsFatalError { get; }
 

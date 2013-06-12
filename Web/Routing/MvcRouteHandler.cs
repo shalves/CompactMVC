@@ -41,8 +41,8 @@ namespace System.Web.Routing
             try
             {
                 var assembly = Assembly.Load(AssemblyName);
-                IHttpHandler handler = assembly.CreateInstance(
-                    string.Format("{0}.{1}", AssemblyName, TypeName)) as IHttpHandler;
+                IHttpHandler handler = 
+                    assembly.CreateInstance(string.Format("{0}.{1}", AssemblyName, TypeName)) as IHttpHandler;
 
                 if (handler == null) return null;
 

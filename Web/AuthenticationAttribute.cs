@@ -6,7 +6,6 @@ namespace System.Web
     /// Action的Authentication标记类
     /// <para>被标记的方法限制是否认证用户才可以请求被标记的Action</para>
     /// </summary>
-    
     public sealed class AuthenticationAttribute : ActionAttribute
     {
         string[] _Roles = new string[] { "*" };
@@ -56,7 +55,6 @@ namespace System.Web
                     }
                 }
             }
-
             return false;
         }
     }

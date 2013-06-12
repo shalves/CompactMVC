@@ -80,17 +80,16 @@ namespace System.Json
         string IJson.ToString()
         {
             string paireFormat = QuotePropertyName ? "\"{0}\": {1}" : "{0} : {1}";
-
-            StringBuilder str = new StringBuilder();
-            str.Append("{");
-            for (int i = 0; i < Count; )
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{");
+            for (int i = 0; i < Count; i++)
             {
-                str.AppendFormat(paireFormat, Keys[i], JSProperty.GetJSValue(this[i]));
-                i++;
-                if (i < Count) str.Append(", ");
+                sb.AppendFormat(paireFormat, Keys[i], JSProperty.GetJSValue(this[i]));
+                sb.Append(", ");
             }
-            str.Append("}");
-            return str.ToString();
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append("}");
+            return sb.ToString();
         }
         #endregion
     }

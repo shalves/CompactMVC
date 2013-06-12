@@ -12,7 +12,7 @@ namespace System.Extensions
         /// <returns></returns>
         public static bool IsNullOrEmpty(this string arg)
         {
-            return String.IsNullOrEmpty(arg);
+            return string.IsNullOrEmpty(arg);
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace System.Extensions
         /// <returns></returns>
         public static string FormatWith(this string format, params object[] args)
         {
-            return String.Format(format, args);
+            return string.Format(format, args);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace System.Extensions
         public static string Pad(this string arg, char paddingChar, int count)
         {
             string tmp = new string(paddingChar, count);
-            return "{0}{1}{2}".FormatWith(tmp, arg, tmp);
+            return string.Format("{0}{1}{2}", tmp, arg, tmp);
         }
 
         /// <summary>
@@ -48,13 +48,13 @@ namespace System.Extensions
         public static string Merge(this string[] array, char sparator)
         {
             if (array == null || array.Length == 0) return string.Empty;
-            StringBuilder tmp = new StringBuilder();
-            array.Each<string>((s) =>
+            StringBuilder sb = new StringBuilder();
+            foreach (string str in array)
             {
-                tmp.Append(sparator);
-                tmp.Append(s);
-            });
-            return tmp.Remove(0, 1).ToString();
+                sb.Append(sparator);
+                sb.Append(str);
+            }
+            return sb.Remove(0, 1).ToString();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace System.Extensions
         /// <returns></returns>
         public static string JSEncode(this string arg)
         {
-            if (arg.IsNullOrEmpty()) return "";
+            if (string.IsNullOrEmpty(arg)) return "";
 
             return arg.
                 Replace(@"\", @"\\").

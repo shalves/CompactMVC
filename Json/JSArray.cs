@@ -68,16 +68,16 @@ namespace System.Json
         #region IJson 成员
         string IJson.ToString()
         {
-            StringBuilder str = new StringBuilder();
-            str.Append("[");
-            for (int i = 0; i < Count; )
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            foreach (object obj in this)
             {
-                str.Append(JSProperty.GetJSValue(this[i]));
-                i++;
-                if (i < Count) str.Append(", ");
+                sb.Append(JSProperty.GetJSValue(obj));
+                sb.Append(", ");
             }
-            str.Append("]");
-            return str.ToString();
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append("]");
+            return sb.ToString();
         }
         #endregion
     }

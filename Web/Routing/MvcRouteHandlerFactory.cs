@@ -1,6 +1,4 @@
-﻿using System.Extensions;
-
-namespace System.Web.Routing
+﻿namespace System.Web.Routing
 {
     public sealed class MvcRouteHandlerFactory
     {
@@ -24,13 +22,13 @@ namespace System.Web.Routing
 
         public IRouteHandler CreateRouteHandler(string typeName)
         {
-            if (TypeNamePrefix.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(TypeNamePrefix))
             {
                 return new MvcRouteHandler(AssemblyName, typeName);
             }
             else
             {
-                return new MvcRouteHandler(AssemblyName, "{0}.{1}".FormatWith(TypeNamePrefix, typeName));
+                return new MvcRouteHandler(AssemblyName, string.Format("{0}.{1}", TypeNamePrefix, typeName));
             }
         }
     }

@@ -60,7 +60,7 @@ namespace System.Web
         }
 
         /// <summary>
-        /// 重写此方法以实现对Http请求的处理和影响
+        /// 重写此方法以实现对Http请求的处理和响应
         /// </summary>
         protected abstract void OnProcessRequest();
 

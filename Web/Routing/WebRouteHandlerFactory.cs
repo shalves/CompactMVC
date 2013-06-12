@@ -1,6 +1,4 @@
-﻿using System.Extensions;
-
-namespace System.Web.Routing
+﻿namespace System.Web.Routing
 {
     public sealed class WebRouteHandlerFactory
     {
@@ -17,13 +15,14 @@ namespace System.Web.Routing
 
         public IRouteHandler CreateRouteHandler(string handlerName)
         {
-            if (HandlersDirectory.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(HandlersDirectory))
             {
-                return new WebRouteHandler("~/{0}".FormatWith(handlerName));
+                return new WebRouteHandler(string.Format("~/{0}", handlerName));
             }
             else
             {
-                return new WebRouteHandler("{0}/{1}".FormatWith(HandlersDirectory.TrimEnd('/'), handlerName));
+                return new WebRouteHandler(
+                    string.Format("{0}/{1}", HandlersDirectory.TrimEnd('/'), handlerName));
             }
         }
     }

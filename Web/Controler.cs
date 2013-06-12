@@ -90,7 +90,7 @@ namespace System.Web
 
         /// <summary>
         /// 获取当前请求执行的Action名称
-        /// <para>小写形式，默认值：default</para>
+        /// <para>默认值：default</para>
         /// </summary>
         public virtual string Action
         {
@@ -112,6 +112,16 @@ namespace System.Web
         }
 
         /// <summary>
+        /// 当请求执行的Action未找到时要执行的操作
+        /// <para>默认抛出异常</para>
+        /// </summary>
+        protected virtual void OnActionNotFound()
+        {
+            throw new Exception(
+                      string.Format("控制器 \"{0}\" 中没有名为 \"{1}\" 的 Action (Action是在控制器中定义的同名无参方法)", ThisType.Name, Action));
+        }
+
+        /// <summary>
         /// 在验证当前请求的Action的某个标记规则失败后要执行的操作
         /// </summary>
         /// <param name="attr"></param>
@@ -123,7 +133,6 @@ namespace System.Web
                 if (!string.IsNullOrEmpty(httpAttr.RedirectUrl))
                 {
                     Response.Redirect(httpAttr.RedirectUrl, true);
-                    return;
                 }
                 else
                 {
@@ -148,19 +157,21 @@ namespace System.Web
         /// 调用运行时控制器实例的指定方法
         /// </summary>
         /// <param name="actionName">方法名称</param>
-        void InvokeAction(string actionName)
+        void InvokeAction()
         {
             //指定Action方法应该具有的标志特性
             BindingFlags acionFlags =
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.InvokeMethod;
+            //得到Action同名的无参方法的实例
+            var action = ThisType.GetMethod(Action, acionFlags, null, Type.EmptyTypes, null);
 
-            //获取Action的同名无参方法
-            var action = ThisType.GetMethod(actionName, acionFlags, null, Type.EmptyTypes, null) as MethodInfo;
-
-            if (action != null)
+            if (action == null)
+            {
+                OnActionNotFound();
+            }
+            else
             {
                 var attrs = Attribute.GetCustomAttributes(action, typeof(ActionAttribute)) as ActionAttribute[];
-
                 if (attrs != null)
                 {
                     foreach (var attr in attrs)
@@ -177,13 +188,7 @@ namespace System.Web
                         }
                     }
                 }
-
                 action.Invoke(this, null);
-            }
-            else
-            {
-                throw new Exception(
-                    string.Format("控制器 \"{0}\" 中没有名为 \"{1}\" 的 Action (Action是在控制器中定义的同名无参方法)", ThisType.Name, actionName));
             }
         }
 
@@ -199,7 +204,7 @@ namespace System.Web
             BeforeProcessRequest();
 
             //执行对当前请求的Action的调用
-            InvokeAction(Action);
+            InvokeAction();
         }
 
         /// <summary>

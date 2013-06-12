@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Extensions;
 using System.Web.Compilation;
 
 namespace System.Web.UI
@@ -19,7 +18,9 @@ namespace System.Web.UI
             get 
             {
                 if (_ViewList == null)
+                {
                     _ViewList = new NameValueCollection();
+                }
                 return _ViewList;
             }
         }
@@ -29,7 +30,7 @@ namespace System.Web.UI
         /// </summary>
         /// <param name="viewName"></param>
         /// <returns></returns>
-        public static ViewPage ResolveGenericView(string viewName)
+        public static ViewPage ResolveView(string viewName)
         {
             return ResolveView(viewName, null);
         }
@@ -43,9 +44,9 @@ namespace System.Web.UI
         public static ViewPage ResolveView(string viewName, object viewModel)
         {
             string viewPath = Views[viewName];
-            
-            if (viewPath.IsNullOrEmpty())
-                throw new Exception("视图 \"{0}\" 不存在".FormatWith(viewName));
+
+            if (string.IsNullOrEmpty(viewPath))
+                throw new Exception(string.Format("视图 \"{0}\" 不存在", viewName));
 
             try
             {
@@ -53,7 +54,7 @@ namespace System.Web.UI
                         CreateInstanceFromVirtualPath(viewPath, typeof(ViewPage)) as ViewPage;
 
                 if (newView == null)
-                    throw new Exception("创建视图 \"{0}\" 失败".FormatWith(viewName));
+                    throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
 
                 newView.SetVirtualPath(viewPath);
                 newView.SetViewModel(viewModel);
@@ -76,8 +77,8 @@ namespace System.Web.UI
         {
             string viewPath = Views[viewName];
 
-            if (viewPath.IsNullOrEmpty())
-                throw new Exception("视图 \"{0}\" 不存在".FormatWith(viewName));
+            if (string.IsNullOrEmpty(viewPath))
+                throw new Exception(string.Format("视图 \"{0}\" 不存在", viewName));
 
             try
             {
@@ -85,7 +86,7 @@ namespace System.Web.UI
                         CreateInstanceFromVirtualPath(viewPath, typeof(ViewPage<T>)) as ViewPage<T>;
 
                 if (newView == null)
-                    throw new Exception("创建视图 \"{0}\" 失败".FormatWith(viewName));
+                    throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
 
                 newView.SetVirtualPath(viewPath);
                 newView.SetViewModel(viewModel);

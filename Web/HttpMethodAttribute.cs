@@ -42,7 +42,7 @@
         /// <returns></returns>
         public override bool Validate(Controler controler)
         {
-            return (this.Allow == (this.Allow | controler.HttpMethod));
+            return this.Allow == (this.Allow | controler.HttpMethod);
         }
     }
 }

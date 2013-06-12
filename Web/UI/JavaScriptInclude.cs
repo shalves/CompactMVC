@@ -1,6 +1,4 @@
-﻿using System.Extensions;
-
-namespace System.Web.UI
+﻿namespace System.Web.UI
 {
     /// <summary>
     /// 表示客户端JS脚本的引用
@@ -21,7 +19,7 @@ namespace System.Web.UI
 
         public override string ToString()
         {
-            return ScriptTextFormat.FormatWith(_Src);
+            return string.Format(ScriptTextFormat, _Src);
         }
     }
 }

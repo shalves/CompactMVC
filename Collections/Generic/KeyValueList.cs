@@ -81,7 +81,7 @@ namespace System.Collections.Generic
 
         /// <summary>
         /// 获取指定名称的项在集合中的位置
-        /// <para>截断式循环</para>
+        /// <para>双循环</para>
         /// </summary>
         /// <param name="key">项名称</param>
         /// <returns></returns>
@@ -209,9 +209,9 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// 遍历集合中所有元素,并对每个元素执行指定的方法
+        /// 遍历当前集合，并对集合中每组键值对执行指定的方法
         /// </summary>
-        /// <param name="func">匿名函数(int: Index, string: Key, T: Value, bool: 当返回false时中断)</param>
+        /// <param name="func">匿名函数（int: Index, string: Key, T: Value, bool: 返回false时中断）</param>
         public void Each(Func<int, string, TValue, bool> func)
         {
             for (int i = 0; i < Count; i++)
@@ -254,7 +254,11 @@ namespace System.Collections.Generic
             _PTR = -1;
         }
 
-        void IDisposable.Dispose() { }
+        void IDisposable.Dispose() 
+        {
+            _ITEM.Clear();
+            _ITEM = null;
+        }
         #endregion
 
         /// <summary>

@@ -16,14 +16,7 @@ namespace System.Web.UI
             if (newDict == null || newDict.Count == 0) return;
             foreach (var item in newDict)
             {
-                if (ContainsKey(item.Key))
-                {
-                    this[item.Key] = item.Value;
-                }
-                else
-                {
-                    this.Add(item.Key, item.Value);
-                }
+                this[item.Key] = item.Value;
             }
         }
     }

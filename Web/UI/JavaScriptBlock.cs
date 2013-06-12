@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Extensions;
 
 namespace System.Web.UI
 {
@@ -45,7 +44,7 @@ namespace System.Web.UI
 
         public override string ToString()
         {
-            return ScriptTextFormat.FormatWith(_ScriptText.ToString());
+            return string.Format(ScriptTextFormat, _ScriptText.ToString());
         }
     }
 }

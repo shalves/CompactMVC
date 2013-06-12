@@ -22,7 +22,7 @@ namespace System.Json
 
             if (arg is char || arg is string || arg is DateTime)
             {
-                value = "\"{0}\"".FormatWith(arg.ToString().JSEncode());
+                value = string.Format("\"{0}\"", arg.ToString().JSEncode());
             }
             else if (arg is bool)
             {
@@ -32,11 +32,11 @@ namespace System.Json
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append("[");
-                (arg as IEnumerable).Each((i, t) =>
+                foreach (object obj in (IEnumerable)arg)
                 {
-                    sb.Append(GetJSValue(t));
+                    sb.Append(GetJSValue(obj));
                     sb.Append(",");
-                });
+                }
                 sb.Remove(sb.Length - 1, 1);
                 sb.Append("]");
                 return sb.ToString();

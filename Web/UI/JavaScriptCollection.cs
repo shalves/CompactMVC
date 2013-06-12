@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Extensions;
 using System.Text;
 
 namespace System.Web.UI
@@ -9,16 +8,13 @@ namespace System.Web.UI
         public override string ToString()
         {
             if (Count == 0) return string.Empty;
-
-            StringBuilder tmp = new StringBuilder();
-
-            Items.Each<JavaScript>((int i, JavaScript js) =>
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < Items.Count; i++)
             {
-                tmp.Append(js.ToString());
-                if (i + 1 < Count) tmp.AppendLine();
-            });
-
-            return tmp.ToString();
+                sb.Append(Items[i].ToString());
+                if (i + 1 < Count) sb.AppendLine();
+            }
+            return sb.ToString();
         }
     }
 }

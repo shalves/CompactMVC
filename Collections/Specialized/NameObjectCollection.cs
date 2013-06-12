@@ -10,7 +10,7 @@
             get { return BaseGet(name); }
             set { BaseSet(name, value); }
         }
-
+        
         public virtual object this[int index]
         {
             get { return BaseGet(index); }
@@ -70,6 +70,18 @@
             for (int i = 0; i < newCollection.Count; i++)
             {
                 this[newCollection.GetKey(i)] = newCollection[i];
+            }
+        }
+
+        /// <summary>
+        /// 遍历当前集合，并对集合中的每组键值对执行指定的方法
+        /// </summary>
+        /// <param name="func">匿名函数（int: Index, string: Key, object: Value, bool: 返回false时中断）</param>
+        public void Each(Func<int, string, object, bool> func)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (!func(i, GetKey(i), this[i])) break;
             }
         }
 
