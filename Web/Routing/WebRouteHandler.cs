@@ -3,26 +3,27 @@
 namespace System.Web.Routing
 {
     /// <summary>
-    /// 创建用于Web应用程序的路由请求处理程序
+    /// 用于Web应用程序的路由请求处理程序
+    /// <para>可以通过Url直接请求的IHttpHandler</para>
     /// </summary>
     internal sealed class WebRouteHandler : IRouteHandler
     {
+        readonly string _HandlerVirtualPath;
         /// <summary>
-        /// 获取处理程序的虚拟路径
+        /// 获取Web路由处理程序的完整虚拟路径
         /// </summary>
-        public string VirtualPath
+        public string HandlerVirtualPath
         {
-            get; 
-            private set; 
+            get { return _HandlerVirtualPath; }
         }
 
         /// <summary>
         /// 初始化WebRouteHandler类的新实例
         /// </summary>
-        /// <param name="virtualPath">指定处理程序的虚拟路径</param>
-        public WebRouteHandler(string virtualPath)
+        /// <param name="handlerVirtualPath">指定Web路由处理程序的完整虚拟路径</param>
+        public WebRouteHandler(string handlerVirtualPath)
         {
-            this.VirtualPath = virtualPath;
+            this._HandlerVirtualPath = handlerVirtualPath;
         }
 
         IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext)
@@ -30,7 +31,7 @@ namespace System.Web.Routing
             try
             {
                 IHttpHandler handler = BuildManager.
-                    CreateInstanceFromVirtualPath(VirtualPath, typeof(IHttpHandler)) as IHttpHandler;
+                    CreateInstanceFromVirtualPath(HandlerVirtualPath, typeof(IHttpHandler)) as IHttpHandler;
 
                 if (handler == null) return null;
 

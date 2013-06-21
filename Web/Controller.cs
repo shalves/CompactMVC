@@ -11,9 +11,9 @@ using System.Web.UI;
 namespace System.Web
 {
     /// <summary>
-    /// 为处理Http路由请求的Controler提供基类
+    /// 为处理Http路由请求的Controller提供基类
     /// </summary>
-    public abstract class Controler : RouteableHttpHandler, IRequiresSessionState
+    public abstract class Controller : RouteableHttpHandler, IRequiresSessionState
     {
         #region 常用的ASP.NET对象
         /// <summary>
@@ -199,7 +199,7 @@ namespace System.Web
         {
             //初始化视图数据集合
             _ViewData = new ViewDataDictionary();
-
+            
             //调用预置方法
             BeforeProcessRequest();
 

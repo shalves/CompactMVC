@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="controler"></param>
         /// <returns></returns>
-        public override bool Validate(Controler controler)
+        public override bool Validate(Controller controler)
         {
             return this.Allow == (this.Allow | controler.HttpMethod);
         }

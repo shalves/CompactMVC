@@ -42,7 +42,7 @@ namespace System.Web
         /// </summary>
         /// <param name="controler"></param>
         /// <returns></returns>
-        public override bool Validate(Controler controler)
+        public override bool Validate(Controller controler)
         {
             if (controler.Request.IsAuthenticated)
             {

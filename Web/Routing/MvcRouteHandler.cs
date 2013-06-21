@@ -3,46 +3,58 @@
 namespace System.Web.Routing
 {
     /// <summary>
-    /// 创建用于MvcApplication的路由请求处理程序
+    /// 用于Mvc应用程序的路由请求处理程序
     /// </summary>
     internal sealed class MvcRouteHandler : IRouteHandler
     {
+        readonly string _HandlersAssemblyName;
         /// <summary>
-        /// 获取或设置处理程序所在的程序集名称
+        /// 获取Mvc路由处理程序所在的程序集的名称
         /// </summary>
-        public string AssemblyName
+        public string HandlersAssemblyName
         {
-            get;
-            private set;
+            get { return _HandlersAssemblyName; }
         }
 
+        readonly string _HandlerFullName;
         /// <summary>
-        /// 获取处理程序的类型名称
+        /// 获取Mvc路由处理程序的完整类型名
         /// </summary>
-        public string TypeName
+        public string HandlerFullName
         {
-            get;
-            private set;
+            get { return _HandlerFullName; }
+        }
+
+        static Assembly _HandlersAssembly;
+        /// <summary>
+        /// 获取Mvc路由处理程序所在的程序集的Assembly实例
+        /// <para>单例模式</para>
+        /// </summary>
+        /// <returns></returns>
+        internal Assembly GetHandlersAssembly()
+        {
+            if (MvcRouteHandler._HandlersAssembly == null)
+                MvcRouteHandler._HandlersAssembly = Assembly.Load(this.HandlersAssemblyName);
+            return MvcRouteHandler._HandlersAssembly;
         }
 
         /// <summary>
         /// 初始化MvcRouteHandler类的新实例
         /// </summary>
-        /// <param name="assemblyName">处理程序所在的程序集名称</param>
-        /// <param name="typeName">处理程序的类型名称</param>
-        public MvcRouteHandler(string assemblyName, string typeName)
+        /// <param name="handlersAssemblyName">Mvc路由处理程序所在的程序集的名称</param>
+        /// <param name="handlerFullName">指定Mvc路由处理程序的完整类型名</param>
+        public MvcRouteHandler(string handlersAssemblyName, string handlerFullName)
         { 
-            this.AssemblyName = assemblyName;
-            this.TypeName = typeName;
+            this._HandlersAssemblyName = handlersAssemblyName;
+            this._HandlerFullName = handlerFullName;
         }
 
         IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext)
         {
             try
             {
-                var assembly = Assembly.Load(AssemblyName);
-                IHttpHandler handler = 
-                    assembly.CreateInstance(string.Format("{0}.{1}", AssemblyName, TypeName)) as IHttpHandler;
+                Assembly handlersAssembly = GetHandlersAssembly();
+                IHttpHandler handler = handlersAssembly.CreateInstance(HandlerFullName) as IHttpHandler;
 
                 if (handler == null) return null;
 

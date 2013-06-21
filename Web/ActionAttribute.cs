@@ -17,6 +17,6 @@
         /// </summary>
         /// <param name="controler"></param>
         /// <returns></returns>
-        public abstract bool Validate(Controler controler);
+        public abstract bool Validate(Controller controler);
     }
 }

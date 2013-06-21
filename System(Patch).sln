@@ -6,7 +6,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "资源", "资源", "{58F0DCF6-779D-4C8B-ADB8-95839BD5E109}"
 	ProjectSection(SolutionItems) = preProject
 		CompactMVC_Demo.zip = CompactMVC_Demo.zip
-		CompactMvc_项模板 for VS2010.zip = CompactMvc_项模板 for VS2010.zip
+		CompactMVC_项模板 for VS2010.zip = CompactMVC_项模板 for VS2010.zip
 	EndProjectSection
 EndProject
 Global

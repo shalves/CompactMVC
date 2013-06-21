@@ -90,8 +90,11 @@
     <Compile Include="Json\JSArray.cs" />
     <Compile Include="Json\JSObject.cs" />
     <Compile Include="Json\JSProperty.cs" />
+    <Compile Include="PatchVersion.cs" />
     <Compile Include="Web\ActionAttribute.cs" />
-    <Compile Include="Web\Controler.cs" />
+    <Compile Include="Web\Controller.cs" />
+    <Compile Include="Web\Routing\IRouteHandlerFactory.cs" />
+    <Compile Include="Web\Routing\MvcRouteHandlerFactory.cs" />
     <Compile Include="Web\GlobalBase.cs" />
     <Compile Include="Web\HttpVerb.cs" />
     <Compile Include="Web\HttpMethodAttribute.cs" />
@@ -99,8 +102,10 @@
     <Compile Include="Web\Routing\IRouteable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\Routing\MvcRouteHandler.cs" />
-    <Compile Include="Web\Routing\MvcRouteHandlerFactory.cs" />
-    <Compile Include="Web\Routing\WebRouteHandler.cs" />
+    <Compile Include="Web\Routing\RouteCollectionExtensions.cs" />
+    <Compile Include="Web\Routing\WebRouteHandler.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Web\Routing\WebRouteHandlerFactory.cs" />
     <Compile Include="Web\UI\JavaScript.cs" />
     <Compile Include="Web\UI\JavaScriptBlock.cs" />

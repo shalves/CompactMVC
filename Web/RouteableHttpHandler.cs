@@ -5,7 +5,7 @@ namespace System.Web
 {
     /// <summary>
     /// 为路由请求的处理程序提供基类
-    /// <para>用于Contorler和自定义的HttpHandler, 如(一般处理程序ashx)</para>
+    /// <para>用于Contorller和自定义的HttpHandler, 如(一般处理程序ashx)</para>
     /// </summary>
     public abstract class RouteableHttpHandler : IHttpHandler, IRouteable
     {
