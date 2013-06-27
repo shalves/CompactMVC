@@ -73,6 +73,15 @@ namespace System.Web
         }
 
         /// <summary>
+        /// 在请求结束时执行的代码
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void Application_EndRequest(object sender, EventArgs e)
+        { 
+        }
+
+        /// <summary>
         /// 在接收到新的验证用户的请求时执行的代码
         /// </summary>
         /// <param name="sender"></param>

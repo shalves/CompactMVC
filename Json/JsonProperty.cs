@@ -1,26 +1,30 @@
-﻿using System.Text;
+﻿using System.Collections;
 using System.Extensions;
-using System.Collections;
+using System.Text;
 
 namespace System.Json
 {
     /// <summary>
-    /// 表示JS对象的值属性
+    /// 表示Json对象的属性
     /// </summary>
-    internal sealed class JSProperty
+    internal sealed class JsonProperty
     {
         /// <summary>
-        /// 获取该属性值的JS字符串形式
+        /// 获取指定对象在作为Json对象的属性时的字符串值
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public static string GetJSValue(object arg)
+        public static string ValueOf(object arg)
         {
             if (arg == null) return "null";
 
             string value = string.Empty;
 
-            if (arg is char || arg is string || arg is DateTime)
+            if (arg is IJson)
+            {
+                value = ((IJson)arg).GetJsonString();
+            }
+            else if (arg is char || arg is string || arg is DateTime)
             {
                 value = string.Format("\"{0}\"", arg.ToString().JSEncode());
             }
@@ -30,20 +34,18 @@ namespace System.Json
             }
             else if (arg is IEnumerable)
             {
+                int total = 0;
                 StringBuilder sb = new StringBuilder();
                 sb.Append("[");
                 foreach (object obj in (IEnumerable)arg)
                 {
-                    sb.Append(GetJSValue(obj));
-                    sb.Append(",");
+                    sb.Append(", ");
+                    sb.Append(ValueOf(obj));
+                    total++;
                 }
-                sb.Remove(sb.Length - 1, 1);
+                if (total > 0) sb.Remove(1, 2);
                 sb.Append("]");
                 return sb.ToString();
-            }
-            else if (arg is IJson)
-            {
-                value = ((IJson)arg).ToString();
             }
             else
             {

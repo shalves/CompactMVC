@@ -18,9 +18,7 @@ namespace System.Web.UI
             get
             {
                 if (_RouteValues == null)
-                { 
                     _RouteValues = ((IRouteable)this).RequestContext.GetRouteParamCollection();
-                }
                 return _RouteValues;
             }
         }

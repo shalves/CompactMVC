@@ -1,10 +1,21 @@
-﻿namespace System
+﻿using System.Reflection;
+
+namespace System
 {
     public static class PatchVersion
     {
+        static string _Value;
         /// <summary>
-        /// System(Patch)程序集的版本号
+        /// 获取System(Patch)程序集的版本号
         /// </summary>
-        public const string Value = "1.3.7.2";
+        public static string Value
+        {
+            get { return _Value; }
+        }
+
+        static PatchVersion()
+        {
+            _Value = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        }
     }
 }

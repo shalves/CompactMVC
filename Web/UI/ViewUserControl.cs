@@ -11,7 +11,6 @@ namespace System.Web.UI
         }
 
         ViewDataDictionary _ViewData;
-
         public ViewDataDictionary ViewData
         {
             get { return _ViewData; }

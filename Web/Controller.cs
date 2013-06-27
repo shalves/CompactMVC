@@ -3,7 +3,7 @@ using System.Json;
 using System.Reflection;
 using System.Security.Principal;
 using System.Text;
-using System.Web.Caching;
+using System.Web.Routing;
 using System.Web.Security;
 using System.Web.SessionState;
 using System.Web.UI;
@@ -11,72 +11,13 @@ using System.Web.UI;
 namespace System.Web
 {
     /// <summary>
-    /// 为处理Http路由请求的Controller提供基类
+    /// 为支持Http路由的Mvc应用程序中的Controller提供基类
     /// </summary>
-    public abstract class Controller : RouteableHttpHandler, IRequiresSessionState
-    {
-        #region 常用的ASP.NET对象
-        /// <summary>
-        /// 获取当前Http请求的Application对象
-        /// </summary>
-        public HttpApplicationState Application
-        {
-            get { return Context.Application; }
-        }
-
-        /// <summary>
-        /// 获取当前应用程序域的Cache对象
-        /// </summary>
-        public Cache Cache
-        {
-            get { return Context.Cache; }
-        }
-
-        /// <summary>
-        /// 获取当前Http请求的Request对象
-        /// </summary>
-        public HttpRequest Request
-        {
-            get { return Context.Request; }
-        }
-
-        /// <summary>
-        /// 获取当前Http请求的Response对象
-        /// </summary>
-        public HttpResponse Response
-        {
-            get { return Context.Response; }
-        }
-
-        /// <summary>
-        /// 获取提供用于处理Web请求的Server对象
-        /// </summary>
-        public HttpServerUtility Server
-        {
-            get { return Context.Server; }
-        }
-
-        /// <summary>
-        /// 获取当前Http请求的Session对象
-        /// </summary>
-        public HttpSessionState Session
-        {
-            get { return Context.Session; }
-        }
-
-        /// <summary>
-        /// 为当前HTTP请求获取或设置安全信息
-        /// </summary>
-        public IPrincipal User
-        {
-            get { return Context.User; }
-            set { Context.User = value; }
-        }
-        #endregion
-        
+    public abstract class Controller : RouteableHttpHandler, IController, IRequiresSessionState
+    {       
         Type _ThisType;
         /// <summary>
-        /// 获取该控制器的运行实例的具体类型
+        /// 获取该控制器在运行时的类型实例
         /// </summary>
         internal Type ThisType
         {
@@ -115,29 +56,30 @@ namespace System.Web
         /// 当请求执行的Action未找到时要执行的操作
         /// <para>默认抛出异常</para>
         /// </summary>
-        protected virtual void OnActionNotFound()
+        protected virtual DecisiveOperatingInstruction OnActionNotFound()
         {
-            throw new Exception(
-                      string.Format("控制器 \"{0}\" 中没有名为 \"{1}\" 的 Action (Action是在控制器中定义的同名无参方法)", ThisType.Name, Action));
+            return DecisiveOperatingInstruction.ThrowException(
+                new Exception(string.Format("控制器 \"{0}\" 中没有名为 \"{1}\" 的 Action (Action是在控制器中定义的同名无参方法)", ThisType.Name, Action)));
         }
 
         /// <summary>
         /// 在验证当前请求的Action的某个标记规则失败后要执行的操作
         /// </summary>
         /// <param name="attr"></param>
-        protected virtual void OnActionAttributeValidateFailed(ActionAttribute attr)
+        protected virtual DecisiveOperatingInstruction OnActionAttributeValidateFailed(ActionAttribute attr)
         {
             if (attr is HttpMethodAttribute)
             {
                 var httpAttr = attr as HttpMethodAttribute;
                 if (!string.IsNullOrEmpty(httpAttr.RedirectUrl))
                 {
-                    Response.Redirect(httpAttr.RedirectUrl, true);
+                    ResponseRedirect(httpAttr.RedirectUrl, true);
+                    return DecisiveOperatingInstruction.Abort();
                 }
                 else
                 {
-                    throw new Exception(
-                        string.Format("方法 \"{0}\" 不接受类型为 \"{1}\" 的HTTP请求", Action, HttpMethod));
+                    return DecisiveOperatingInstruction.ThrowException(
+                        new Exception(string.Format("方法 \"{0}\" 不接受类型为 \"{1}\" 的HTTP请求", Action, HttpMethod)));
                 }
             }
             else if (attr is AuthenticationAttribute)
@@ -150,13 +92,14 @@ namespace System.Web
                 {
                     Response401();
                 }
+                return DecisiveOperatingInstruction.Abort();
             }
+            return DecisiveOperatingInstruction.NoOperation();
         }
 
         /// <summary>
-        /// 调用运行时控制器实例的指定方法
+        /// 调用当前请求执行的Action
         /// </summary>
-        /// <param name="actionName">方法名称</param>
         void InvokeAction()
         {
             //指定Action方法应该具有的标志特性
@@ -167,7 +110,14 @@ namespace System.Web
 
             if (action == null)
             {
-                OnActionNotFound();
+                var op = OnActionNotFound();
+                switch (op.ToDo)
+                { 
+                    case DecisiveOperatingInstruction.Operation.Abort: return;
+                    case DecisiveOperatingInstruction.Operation.ThrowException: 
+                        throw op.ExcpetionToThrow;;
+                    case DecisiveOperatingInstruction.Operation.NoOperation: break;
+                }
             }
             else
             {
@@ -178,17 +128,30 @@ namespace System.Web
                     {
                         if (!attr.Validate(this))
                         {
-                            OnActionAttributeValidateFailed(attr);
-                            if (attr.IsFatalError)
+                            var op = OnActionAttributeValidateFailed(attr);
+                            switch (op.ToDo)
                             {
-                                throw new Exception(
-                                    string.Format("当前请求不符合为 Action \"{0}\" 设定的 \"{1}\" 标记的规则，请求无法执行", Action, attr.GetType().Name));
+                                case DecisiveOperatingInstruction.Operation.Abort: return;
+                                case DecisiveOperatingInstruction.Operation.ThrowException:
+                                    throw op.ExcpetionToThrow; ;
+                                case DecisiveOperatingInstruction.Operation.NoOperation: break;
                             }
-                            break;
                         }
                     }
                 }
-                action.Invoke(this, null);
+
+                try
+                {
+                    action.Invoke(this, null);
+                }
+                catch (Threading.ThreadAbortException)
+                {
+                    //此异常由Response.End()导致，无需处理
+                }
+                catch
+                {
+                    throw;
+                }
             }
         }
 
@@ -203,7 +166,7 @@ namespace System.Web
             //调用预置方法
             BeforeProcessRequest();
 
-            //执行对当前请求的Action的调用
+            //执行当前请求的Action
             InvokeAction();
         }
 
@@ -284,7 +247,8 @@ namespace System.Web
             Response.ContentType = "text/html; charset=utf-8";
             Response.ContentEncoding = Encoding.UTF8;
             Response.Write(script.ToString());
-            Response.End();
+            //Response.End();
+            ResponseEnd();
         }
 
         /// <summary>
@@ -295,8 +259,9 @@ namespace System.Web
         {
             Response.ContentType = "text/plain; charset=utf-8";
             Response.ContentEncoding = Encoding.UTF8;
-            Response.Write(jsonResult);
-            Response.End();
+            Response.Write(jsonResult.GetJsonString());
+            //Response.End();
+            ResponseEnd();
         }
 
         /// <summary>
@@ -308,7 +273,8 @@ namespace System.Web
             Response.StatusCode = 301;
             Response.StatusDescription = "Moved Permanently";
             Response.AppendHeader("Location", targetUrl);
-            Response.End();
+            //Response.End();
+            ResponseEnd();
         }
 
         /// <summary>
@@ -318,7 +284,8 @@ namespace System.Web
         {
             Response.StatusCode = 401;
             Response.StatusDescription = "Unauthorized";
-            Response.End();
+            //Response.End();
+            ResponseEnd();
         }
 
         /// <summary>
@@ -328,7 +295,8 @@ namespace System.Web
         {
             Response.StatusCode = 403;
             Response.StatusDescription = "Forbidden";
-            Response.End();
+            //Response.End();
+            ResponseEnd();
         }
 
         /// <summary>
@@ -338,7 +306,40 @@ namespace System.Web
         {
             Response.StatusCode = 404;
             Response.StatusDescription = "Not Found";
-            Response.End();
+            //Response.End();
+            ResponseEnd();
+        }
+
+        /// <summary>
+        /// 使 ASP.NET 跳过 HTTP 执行管线链中的所有事件和筛选并直接执行 EndRequest 事件
+        /// <para>不会引发“ThreadAbortException”，用于替代Response.End（）方法</para>
+        /// </summary>
+        public void ResponseEnd()
+        {
+            Context.ApplicationInstance.CompleteRequest();
+        }
+
+        /// <summary>
+        /// 将客户端重定向到新的 URL 并指定该新 URL。
+        /// <para>不会引发“ThreadAbortException”，用于替代Response.Redirect（string）方法</para>
+        /// </summary>
+        /// <param name="url">目标的位置。</param>
+        public void ResponseRedirect(string url)
+        {
+            Response.Redirect(url, false);
+            ResponseEnd();
+        }
+
+        /// <summary>
+        /// 将客户端重定向到新的 URL 指定该新 URL 并指定当前页的执行是否终止。
+        /// <para>不会引发“ThreadAbortException”，用于替代Response.Redirect（string，bool）方法</para>
+        /// </summary>
+        /// <param name="url">目标的位置。</param>
+        /// <param name="endResponse">指示当前页的执行是否应终止。</param>
+        public void ResponseRedirect(string url, bool endResponse)
+        {
+            Response.Redirect(url, false);
+            if (endResponse) ResponseEnd();
         }
         #endregion
 
@@ -434,12 +435,16 @@ namespace System.Web
         /// <param name="preserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
         public void RenderView(ViewPage view, bool preserveForm)
         {
-            //Context.RewritePath(view.VirtualPath);
-            Server.Transfer(view, preserveForm);
+            //Context.RewritePath(view.VirtualPath); --
+            //if (view is IRouteable)
+            //    ((IRouteable)view).RequestContext = ((IRouteable)this).RequestContext;
+            //view.ViewData["$_Controller"] = ThisType.Name;
+            //view.ViewData["$_Action"] = Action;
+            //Server.Transfer(view, preserveForm);
+            ExecuteView(view, preserveForm);
+            ResponseEnd();
         }
-        #endregion
 
-        #region 特殊方法
         /// <summary>
         /// 执行指定的视图实例
         /// <para>执行完成后仍回到调用代码</para>
@@ -449,10 +454,15 @@ namespace System.Web
         public void ExecuteView(ViewPage view, bool preserveForm)
         {
             //Context.RewritePath(view.VirtualPath);
-            view.ViewData.MergeFrom(ViewData);
+            if (view is IRouteable)
+                ((IRouteable)view).RequestContext = ((IRouteable)this).RequestContext;
+            view.ViewData["$_Controller"] = ThisType.Name;
+            view.ViewData["$_Action"] = Action;
             Server.Execute(view, null, preserveForm);
         }
+        #endregion
 
+        #region 特殊方法
         /// <summary>
         /// 重定向客户端到指定的Url，并将formData数据附加到Request.Form集合中
         /// <para>不适用于Ajax请求</para>
@@ -473,7 +483,7 @@ namespace System.Web
 
             if (preserveForm)
             {
-                if (target.ToString().IndexOf('?') >= 0)
+                if (target.ToString().IndexOf('?') > -1)
                 {
                     for (int i = 0; i < Request.QueryString.Count; i++)
                     {

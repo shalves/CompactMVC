@@ -1,22 +1,60 @@
-﻿namespace System.Web.UI
+﻿using System.Web.UI.WebControls;
+using System.Web.SessionState;
+
+namespace System.Web.UI
 {
     /// <summary>
     /// 表示包含有ViewData和ViewModel属性的WebForm视图页面
     /// </summary>
     [FileLevelControlBuilder(typeof(ViewPageControlBuilder))]
-    public class ViewPage : Page
+    public class ViewPage : RouteablePage, IReadOnlySessionState
     {
         /// <summary>
         /// 获取或设置页的标题
         /// </summary>
         public new string Title
         {
-            get { return ViewData["Page_Title"].ToString(); }
-            set { ViewData["Page_Title"] = value; }
+            get { return ViewData["$_Page_Title"].ToString(); }
+            set { ViewData["$_Page_Title"] = value; }
+        }
+
+        /// <summary>
+        /// 获取或设置页面Head元素中Meta ContentType标记的内容
+        /// </summary>
+        public string MetaContentType
+        {
+            get { return ViewData["$_Meta_ContentType"].ToString(); }
+            set { ViewData["$_Meta_ContentType"] = value; }
+        }
+
+        /// <summary>
+        /// 获取或设置页面Head元素中Meta Keywords标记的内容
+        /// </summary>
+        public string MetaKeywords
+        {
+            get { return ViewData["$_Meta_Keywords"].ToString(); }
+            set { ViewData["$_Meta_Keywords"] = value; }
+        }
+
+        /// <summary>
+        /// 获取或设置页面Head元素中Meta Description标记的内容
+        /// </summary>
+        public string MetaDescription
+        {
+            get { return ViewData["$_Meta_Description"].ToString(); }
+            set { ViewData["$_Meta_Description"] = value; }
+        }
+
+        string _Name;
+        /// <summary>
+        /// 获取当前视图页面在映射表中的名称
+        /// </summary>
+        public string Name
+        {
+            get { return _Name; }
         }
 
         string _VirtualPath;
-
         /// <summary>
         /// 获取当前视图页面文件的虚拟路径
         /// </summary>
@@ -26,7 +64,6 @@
         }
 
         ViewDataDictionary _ViewData;
-
         /// <summary>
         /// 获取当前视图页的视图数据
         /// </summary>
@@ -53,12 +90,18 @@
         {
             _ViewData = new ViewDataDictionary
             { 
-                {"Page_Title", "New View Page"},
-                {"Meta_ContentType", "text/html; charset=utf-8"},
-                {"Meta_Keywords", ""},
-                {"Meta_Description", ""},
-                {"Page_FrontObject", "null"}
+                {"$_Page_Title", "New View Page"},
+                {"$_Meta_ContentType", "text/html; charset=utf-8"},
+                {"$_Meta_Keywords", ""},
+                {"$_Meta_Description", ""},
+                {"$_Controller", ""},
+                {"$_Action", ""}
             };
+        }
+
+        internal void SetName(string viewName)
+        {
+            _Name = viewName;
         }
 
         internal void SetVirtualPath(string value)

@@ -5,61 +5,65 @@
     /// </summary>
     public sealed class WebRouteHandlerFactory : IRouteHandlerFactory
     {
-        readonly string _HandlersDirectory;
+        readonly string _HandlerDirectory;
         /// <summary>
-        /// 获取Web路由处理程序文件所在的目录的虚拟路径
+        /// 获取路由请求处理程序文件所在目录的虚拟路径
         /// </summary>
-        public string HandlersDirectory
+        public string HandlerDirectory
         {
-            get { return _HandlersDirectory; }
+            get { return _HandlerDirectory; }
         }
 
-        readonly string _HandlersExtension;
+        readonly string _HandlerPostfix;
         /// <summary>
-        /// 获取Web路由处理程序文件的扩展名
+        /// 获取路由请求处理程序文件名的后缀部分
         /// </summary>
-        public string HandlerFilesExtension
+        public string HandlerPostfix
         {
-            get { return _HandlersExtension; }
-        }
-
-        /// <summary>
-        /// 初始化WebRouteHandlerFactory的新实例
-        /// </summary>
-        /// <param name="handlersDirectory">必须是以~/或/开头的绝对路径</param>
-        public WebRouteHandlerFactory(string handlersDirectory)
-        {
-            this._HandlersDirectory = handlersDirectory;
+            get { return _HandlerPostfix; }
         }
 
         /// <summary>
         /// 初始化WebRouteHandlerFactory的新实例
         /// </summary>
-        /// <param name="handlersDirectory">指定Web路由处理程序文件所在的目录的虚拟路径<para>必须是以~/或/开头的绝对路径</para></param>
-        /// <param name="handlersExtension">指定Web路由处理程序文件的扩展名</param>
-        public WebRouteHandlerFactory(string handlersDirectory, string handlersExtension)
+        /// <param name="handlerDirectory">
+        /// 指定路由请求处理程序文件所在目录的虚拟路径
+        /// <para>必须是以~/或/开头的绝对路径</para>
+        /// </param>
+        public WebRouteHandlerFactory(string handlerDirectory)
         {
-            this._HandlersDirectory = handlersDirectory;
-            this._HandlersExtension = handlersExtension;
+            this._HandlerDirectory = handlerDirectory;
         }
 
         /// <summary>
-        /// 根据文件名创建Web路由处理程序的新实例
+        /// 初始化WebRouteHandlerFactory的新实例
         /// </summary>
-        /// <param name="handlerToken">指定Web路由处理程序的文件名</param>
+        /// <param name="handlersDirectory">
+        /// 指定Web路由处理程序文件所在的目录的虚拟路径
+        /// <para>必须是以~/或/开头的绝对路径</para>
+        /// </param>
+        /// <param name="handlerPostfix">指定路由请求处理程序文件名的后缀部分</param>
+        public WebRouteHandlerFactory(string handlersDirectory, string handlerPostfix)
+        {
+            this._HandlerDirectory = handlersDirectory;
+            this._HandlerPostfix = handlerPostfix;
+        }
+
+        /// <summary>
+        /// 创建路由请求处理程序的新实例
+        /// </summary>
+        /// <param name="handlerToken">路由请求处理程序的特征名</param>
         /// <returns></returns>
         public IRouteHandler CreateRouteHandler(string handlerToken)
         {
-            string postfix = string.IsNullOrEmpty(HandlerFilesExtension) ? "ashx" : HandlerFilesExtension;
-
-            if (string.IsNullOrEmpty(HandlersDirectory))
+            if (string.IsNullOrEmpty(HandlerDirectory))
             {
-                return new WebRouteHandler(string.Format("~/{0}Controller.{1}", handlerToken, postfix));
+                return new WebRouteHandler(string.Format("~/{0}{1}.ashx", handlerToken, HandlerPostfix));
             }
             else
             {
                 return new WebRouteHandler(
-                    string.Format("{0}/{1}Controller.{2}", HandlersDirectory.TrimEnd('/'), handlerToken, postfix));
+                    string.Format("{0}/{1}{2}.ashx", HandlerDirectory.TrimEnd('/'), handlerToken, HandlerPostfix));
             }
         }
     }

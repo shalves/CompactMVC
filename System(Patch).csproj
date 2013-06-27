@@ -87,12 +87,15 @@
     <Compile Include="Extensions\StringExts.cs" />
     <Compile Include="Json\IJson.cs" />
     <Compile Include="Json\IPropertyNameQuotable.cs" />
-    <Compile Include="Json\JSArray.cs" />
-    <Compile Include="Json\JSObject.cs" />
-    <Compile Include="Json\JSProperty.cs" />
+    <Compile Include="Json\JsonArray.cs" />
+    <Compile Include="Json\JsonObject.cs" />
+    <Compile Include="Json\JsonProperty.cs" />
     <Compile Include="PatchVersion.cs" />
     <Compile Include="Web\ActionAttribute.cs" />
+    <Compile Include="Web\DecisiveOperatingInstruction.cs" />
     <Compile Include="Web\Controller.cs" />
+    <Compile Include="Web\HttpResponseExtensions.cs" />
+    <Compile Include="Web\IController.cs" />
     <Compile Include="Web\Routing\IRouteHandlerFactory.cs" />
     <Compile Include="Web\Routing\MvcRouteHandlerFactory.cs" />
     <Compile Include="Web\GlobalBase.cs" />
@@ -126,6 +129,8 @@
     <Compile Include="Web\UI\ViewPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Web\UI\ViewType.cs" />
+    <Compile Include="Web\UI\ViewTypeControlBuilder.cs" />
     <Compile Include="Web\UI\ViewTypeParserFilter.cs" />
     <Compile Include="Web\UI\ViewPage`1.cs">
       <SubType>ASPXCodeBehind</SubType>

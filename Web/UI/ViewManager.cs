@@ -18,9 +18,7 @@ namespace System.Web.UI
             get 
             {
                 if (_ViewList == null)
-                {
                     _ViewList = new NameValueCollection();
-                }
                 return _ViewList;
             }
         }
@@ -56,6 +54,7 @@ namespace System.Web.UI
                 if (newView == null)
                     throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
 
+                newView.SetName(viewName);
                 newView.SetVirtualPath(viewPath);
                 newView.SetViewModel(viewModel);
 
@@ -88,6 +87,7 @@ namespace System.Web.UI
                 if (newView == null)
                     throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
 
+                newView.SetName(viewName);
                 newView.SetVirtualPath(viewPath);
                 newView.SetViewModel(viewModel);
 

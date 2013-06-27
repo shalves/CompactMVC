@@ -4,22 +4,22 @@ using System.Web.Routing;
 namespace System.Web
 {
     /// <summary>
-    /// 用于创建Mvc路由处理程序的工厂类
+    /// 用于创建Mvc路由请求处理程序的工厂类
     /// </summary>
     public class MvcRouteHandlerFactory : IRouteHandlerFactory
     {
-        readonly string _HandlersAssemblyName;
+        readonly string _HandlerAssemblyName;
         /// <summary>
-        /// 获取Mvc路由处理程序所在的程序集的名称
+        /// 获取路由请求处理程序所在程序集的名称
         /// </summary>
-        public string HandlersAssemblyName 
+        public string HandlerAssemblyName 
         {
-            get { return _HandlersAssemblyName; }
+            get { return _HandlerAssemblyName; }
         }
 
         readonly string _HandlersNameSpace;
         /// <summary>
-        /// 获取Mvc路由处理程序的统一名称空间
+        /// 获取路由请求处理程序的统一名称空间
         /// </summary>
         public string HandlersNameSpace 
         {
@@ -29,34 +29,34 @@ namespace System.Web
         /// <summary>
         /// 初始化MvcRouteHandlerFactory的新实例
         /// </summary>
-        /// <param name="handlersAssemblyName">指定Mvc路由处理程序所在的程序集的名称</param>
-        public MvcRouteHandlerFactory(string handlersAssemblyName)
+        /// <param name="handlerAssemblyName">指定路由请求处理程序所在程序集的名称</param>
+        public MvcRouteHandlerFactory(string handlerAssemblyName)
         {
-            this._HandlersAssemblyName = handlersAssemblyName;
+            this._HandlerAssemblyName = handlerAssemblyName;
         }
 
         /// <summary>
         /// 初始化MvcRouteHandlerFactory的新实例
         /// </summary>
-        /// <param name="handlersAssemblyName">指定Mvc路由处理程序所在的程序集的名称</param>
-        /// <param name="handlersNameSpace">指定Mvc路由处理程序的统一名称空间</param>
-        public MvcRouteHandlerFactory(string handlersAssemblyName, string handlersNameSpace)
+        /// <param name="handlerAssemblyName">指定路由请求处理程序所在程序集的名称</param>
+        /// <param name="handlerNameSpace">指定路由请求处理程序的统一名称空间</param>
+        public MvcRouteHandlerFactory(string handlerAssemblyName, string handlerNameSpace)
         {
-            this._HandlersAssemblyName = handlersAssemblyName;
-            this._HandlersNameSpace = handlersNameSpace;
+            this._HandlerAssemblyName = handlerAssemblyName;
+            this._HandlersNameSpace = handlerNameSpace;
         }
 
         /// <summary>
-        /// 创建Mvc路由处理程序的新实例
+        /// 创建路由请求处理程序的新实例
         /// </summary>
-        /// <param name="handlerToken">指定处理程序的简要名称</param>
+        /// <param name="handlerToken">路由请求处理程序的特征名</param>
         /// <returns></returns>
         public IRouteHandler CreateRouteHandler(string handlerToken)
         {
             string prefix = 
-                string.IsNullOrEmpty(HandlersNameSpace) ? HandlersAssemblyName : HandlersNameSpace;
-            return new MvcRouteHandler(
-                HandlersAssemblyName, string.Format("{0}.{1}Controller", prefix, handlerToken));
+                string.IsNullOrEmpty(HandlersNameSpace) ? HandlerAssemblyName : HandlersNameSpace;
+
+            return new MvcRouteHandler(HandlerAssemblyName, string.Format("{0}.{1}Controller", prefix, handlerToken));
         }
     }
 }

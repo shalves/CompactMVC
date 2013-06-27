@@ -3,39 +3,38 @@
 namespace System.Web.Routing
 {
     /// <summary>
-    /// 用于Web应用程序的路由请求处理程序
-    /// <para>可以通过Url直接请求的IHttpHandler</para>
+    /// 用于在Web应用程序中处理Http路由请求
+    /// <para>可以通过Url直接请求的Http处理程序</para>
     /// </summary>
-    internal sealed class WebRouteHandler : IRouteHandler
+    internal class WebRouteHandler : IRouteHandler
     {
-        readonly string _HandlerVirtualPath;
+        readonly string _VirtualPath;
         /// <summary>
-        /// 获取Web路由处理程序的完整虚拟路径
+        /// 获取路由请求处理程序文件的完整虚拟路径
         /// </summary>
-        public string HandlerVirtualPath
+        public string VirtualPath
         {
-            get { return _HandlerVirtualPath; }
+            get { return _VirtualPath; }
         }
 
         /// <summary>
         /// 初始化WebRouteHandler类的新实例
         /// </summary>
-        /// <param name="handlerVirtualPath">指定Web路由处理程序的完整虚拟路径</param>
-        public WebRouteHandler(string handlerVirtualPath)
+        /// <param name="virtualPath">指定路由请求处理程序文件的完整虚拟路径</param>
+        public WebRouteHandler(string virtualPath)
         {
-            this._HandlerVirtualPath = handlerVirtualPath;
+            this._VirtualPath = virtualPath;
         }
 
         IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext)
         {
             try
             {
-                IHttpHandler handler = BuildManager.
-                    CreateInstanceFromVirtualPath(HandlerVirtualPath, typeof(IHttpHandler)) as IHttpHandler;
+                IHttpHandler handler = 
+                    BuildManager.CreateInstanceFromVirtualPath(VirtualPath, typeof(IHttpHandler)) as IHttpHandler;
 
-                if (handler == null) return null;
-
-                ((IRouteable)handler).RequestContext = requestContext;
+                if (handler != null && handler is IRouteable)
+                    ((IRouteable)handler).RequestContext = requestContext;
 
                 return handler;
             }

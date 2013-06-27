@@ -7,7 +7,7 @@ namespace System.Web.UI
     {
         private string _viewBaseType;
         private DirectiveType _directiveType = DirectiveType.Unknown;
-        //private bool _viewTypeControlAdded;
+        private bool _viewTypeControlAdded;
 
         public override void PreprocessDirective(string directiveName, IDictionary attributes)
         {
@@ -81,27 +81,27 @@ namespace System.Web.UI
             }
         }
 
-        //public override bool ProcessCodeConstruct(CodeConstructType codeType, string code)
-        //{
-        //    if (!_viewTypeControlAdded &&
-        //        _viewBaseType != null &&
-        //        _directiveType == DirectiveType.Master)
-        //    {
+        public override bool ProcessCodeConstruct(CodeConstructType codeType, string code)
+        {
+            if (!_viewTypeControlAdded &&
+                _viewBaseType != null &&
+                _directiveType == DirectiveType.Master)
+            {
 
-        //        // If we're dealing with a master page that needs to have its base type set, do it here.
-        //        // It's done by adding the ViewType control, which has a builder that sets the base type.
+                // If we're dealing with a master page that needs to have its base type set, do it here.
+                // It's done by adding the ViewType control, which has a builder that sets the base type.
 
-        //        // The code currently assumes that the file in question contains a code snippet, since
-        //        // that's the item we key off of in order to know when to add the ViewType control.
+                // The code currently assumes that the file in question contains a code snippet, since
+                // that's the item we key off of in order to know when to add the ViewType control.
 
-        //        Hashtable attribs = new Hashtable();
-        //        attribs["typename"] = _viewBaseType;
-        //        AddControl(typeof(ViewType), attribs);
-        //        _viewTypeControlAdded = true;
-        //    }
+                Hashtable attribs = new Hashtable();
+                attribs["typename"] = _viewBaseType;
+                AddControl(typeof(ViewType), attribs);
+                _viewTypeControlAdded = true;
+            }
 
-        //    return base.ProcessCodeConstruct(codeType, code);
-        //}
+            return base.ProcessCodeConstruct(codeType, code);
+        }
 
         // Everything else in this class is unrelated to our 'inherits' handling.
         // Since PageParserFilter blocks everything by default, we need to unblock it

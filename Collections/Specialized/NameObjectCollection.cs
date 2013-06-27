@@ -1,4 +1,6 @@
-﻿namespace System.Collections.Specialized
+﻿using System.Extensions;
+
+namespace System.Collections.Specialized
 {
     /// <summary>
     /// 表示名称和System.Object类型的值的集合
@@ -15,6 +17,18 @@
         {
             get { return BaseGet(index); }
             set { BaseSet(index, value); }
+        }
+
+        public NameObjectCollection()
+        { }
+
+        /// <summary>
+        /// 初始化NameObjectCollection的新实例
+        /// </summary>
+        /// <param name="anonymous">指定用于初始化集合的匿名对象</param>
+        public NameObjectCollection(object anonymous)
+        {
+            this.Add(anonymous);
         }
 
         public virtual bool HasKeys()
@@ -52,6 +66,18 @@
         public virtual object[] GetAllValues()
         {
             return BaseGetAllValues();
+        }
+
+        /// <summary>
+        /// 将匿名对象的属性和数据映射到当前集合
+        /// </summary>
+        /// <param name="anonymous"></param>
+        public virtual void Add(object anonymous)
+        {
+            anonymous.EachProperty((name, value) =>
+            {
+                this.Add(name, value);
+            });
         }
 
         public virtual void Add(string name, object value)
