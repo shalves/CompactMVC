@@ -7,7 +7,7 @@ namespace System.Web.UI
     /// 表示包含有ViewData和ViewModel属性的WebForm视图页面
     /// </summary>
     [FileLevelControlBuilder(typeof(ViewPageControlBuilder))]
-    public class ViewPage : RouteablePage, IReadOnlySessionState
+    public class ViewPage : RouteablePage//, IReadOnlySessionState
     {
         /// <summary>
         /// 获取或设置页的标题
@@ -73,7 +73,6 @@ namespace System.Web.UI
         }
 
         object _ViewModel;
-
         /// <summary>
         /// 获取当前视图页的页面模型
         /// </summary>

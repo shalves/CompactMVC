@@ -32,10 +32,14 @@ namespace System.Web.Routing
             {
                 IHttpHandler handler = 
                     BuildManager.CreateInstanceFromVirtualPath(VirtualPath, typeof(IHttpHandler)) as IHttpHandler;
+                if (handler != null)
+                {
+                    if (handler is IRouteable)
+                        ((IRouteable)handler).RequestContext = requestContext;
 
-                if (handler != null && handler is IRouteable)
-                    ((IRouteable)handler).RequestContext = requestContext;
-
+                    if (handler is IController)
+                        ((IController)handler).Initialize(requestContext);
+                }
                 return handler;
             }
             catch

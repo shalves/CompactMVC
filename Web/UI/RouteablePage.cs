@@ -3,35 +3,34 @@
 namespace System.Web.UI
 {
     /// <summary>
-    /// 表示可被路由的WebForm页面的类型
+    /// 表示可被路由的 Asp.NET WebForm 页面的类型
     /// </summary>
     public class RouteablePage : Page, IRouteable
     {
         RequestContext IRouteable.RequestContext { get; set; }
 
-        RouteValueDictionary _RouteValues;
+        RouteData _RouteData;
         /// <summary>
-        /// 获取路由中URL参数值和默认值的集合
+        /// 从当前Http路由请求的上下文中获取路由数据
         /// </summary>
-        public RouteValueDictionary RouteValues
+        public RouteData RouteData
         {
             get
             {
-                if (_RouteValues == null)
-                    _RouteValues = ((IRouteable)this).RequestContext.GetRouteParamCollection();
-                return _RouteValues;
+                if (_RouteData == null)
+                    _RouteData = ((IRouteable)this).RequestContext.GetRouteData();
+                return _RouteData;
             }
         }
 
         /// <summary>
-        /// 获取路由中指定名称的URL参数的值
-        /// <para>当指定的名称的路径值不存在时，不会引发异常</para>
+        /// 从当前Http路由请求的上下文中获取指定名称的路由参数的值
         /// </summary>
-        /// <param name="key">名称</param>
+        /// <param name="name">路由参数的名称</param>
         /// <returns></returns>
-        public object GetRouteValue(string key)
+        public object GetRouteValue(string name)
         {
-            return RouteValues.GetRouteValue(key);
+            return ((IRouteable)this).RequestContext.GetRouteValue(name);
         }
     }
 }

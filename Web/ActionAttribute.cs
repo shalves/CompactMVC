@@ -15,8 +15,8 @@
         /// <summary>
         /// 验证控制器的Action设定的标记
         /// </summary>
-        /// <param name="controler"></param>
+        /// <param name="context">Http请求的上下文信息</param>
         /// <returns></returns>
-        public abstract bool Validate(Controller controler);
+        public abstract bool Validate(HttpContextBase context);
     }
 }

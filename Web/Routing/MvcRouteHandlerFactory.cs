@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using System.Web.Routing;
-
-namespace System.Web
+﻿namespace System.Web.Routing
 {
     /// <summary>
     /// 用于创建Mvc路由请求处理程序的工厂类
@@ -9,6 +6,8 @@ namespace System.Web
     public class MvcRouteHandlerFactory : IRouteHandlerFactory
     {
         readonly string _HandlerAssemblyName;
+        readonly string _HandlersNamespace;
+
         /// <summary>
         /// 获取路由请求处理程序所在程序集的名称
         /// </summary>
@@ -17,13 +16,12 @@ namespace System.Web
             get { return _HandlerAssemblyName; }
         }
 
-        readonly string _HandlersNameSpace;
         /// <summary>
         /// 获取路由请求处理程序的统一名称空间
         /// </summary>
-        public string HandlersNameSpace 
+        public string HandlersNamespace 
         {
-            get { return _HandlersNameSpace; }
+            get { return _HandlersNamespace; }
         }
 
         /// <summary>
@@ -39,11 +37,11 @@ namespace System.Web
         /// 初始化MvcRouteHandlerFactory的新实例
         /// </summary>
         /// <param name="handlerAssemblyName">指定路由请求处理程序所在程序集的名称</param>
-        /// <param name="handlerNameSpace">指定路由请求处理程序的统一名称空间</param>
-        public MvcRouteHandlerFactory(string handlerAssemblyName, string handlerNameSpace)
+        /// <param name="handlerNamespace">指定路由请求处理程序的统一名称空间</param>
+        public MvcRouteHandlerFactory(string handlerAssemblyName, string handlerNamespace)
         {
             this._HandlerAssemblyName = handlerAssemblyName;
-            this._HandlersNameSpace = handlerNameSpace;
+            this._HandlersNamespace = handlerNamespace;
         }
 
         /// <summary>
@@ -54,8 +52,7 @@ namespace System.Web
         public IRouteHandler CreateRouteHandler(string handlerToken)
         {
             string prefix = 
-                string.IsNullOrEmpty(HandlersNameSpace) ? HandlerAssemblyName : HandlersNameSpace;
-
+                string.IsNullOrEmpty(HandlersNamespace) ? HandlerAssemblyName : HandlersNamespace;
             return new MvcRouteHandler(HandlerAssemblyName, string.Format("{0}.{1}Controller", prefix, handlerToken));
         }
     }

@@ -4,7 +4,7 @@ namespace System.Web
 {
     /// <summary>
     /// Action的Authentication标记类
-    /// <para>被标记的方法限制是否认证用户才可以请求被标记的Action</para>
+    /// <para>用于限制只有特定的认证用户才可以请求被标记的Action</para>
     /// </summary>
     public sealed class AuthenticationAttribute : ActionAttribute
     {
@@ -40,16 +40,16 @@ namespace System.Web
         /// <summary>
         /// 验证Action的Authentication标记
         /// </summary>
-        /// <param name="controler"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
-        public override bool Validate(Controller controler)
+        public override bool Validate(HttpContextBase context)
         {
-            if (controler.Request.IsAuthenticated)
+            if (context.Request.IsAuthenticated)
             {
                 if (this.Roles[0].Equals("*")) return true;
                 foreach (var r in this.Roles)
                 {
-                    if (controler.User.IsInRole(r))
+                    if (context.User.IsInRole(r))
                     {
                         return true;
                     }

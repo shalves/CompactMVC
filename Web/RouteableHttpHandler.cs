@@ -10,6 +10,7 @@ namespace System.Web
     /// </summary>
     public abstract class RouteableHttpHandler : IHttpHandler, IRouteable
     {
+        #region IHttpHandler 成员
         bool _IsReusable = false;
         public virtual bool IsReusable
         {
@@ -17,6 +18,18 @@ namespace System.Web
             protected set { _IsReusable = value; }
         }
 
+        /// <summary>
+        /// Http处理程序的主入口处
+        /// </summary>
+        /// <param name="context"></param>
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            _Context = context;
+            OnProcessRequest();
+        }
+        #endregion
+
+        #region 常用的ASP.NET对象
         HttpContext _Context;
         /// <summary>
         /// 获取当前Http请求的上下文
@@ -26,17 +39,6 @@ namespace System.Web
             get { return this._Context; }
         }
 
-        /// <summary>
-        /// Http处理程序的主入口处
-        /// </summary>
-        /// <param name="context"></param>
-        public void ProcessRequest(HttpContext context)
-        {
-            _Context = context;
-            OnProcessRequest();
-        }
-
-        #region 常用的ASP.NET对象
         /// <summary>
         /// 获取当前Http请求的Application对象
         /// </summary>
@@ -93,7 +95,6 @@ namespace System.Web
             get { return Context.User; }
             set { Context.User = value; }
         }
-        #endregion
 
         /// <summary>
         /// 获取当前Http请求所使用的方法
@@ -102,31 +103,31 @@ namespace System.Web
         {
             get { return Context.Request.HttpMethod.ToHttpVerb(); }
         }
+        #endregion
 
         RequestContext IRouteable.RequestContext { get; set; }
 
-        RouteValueDictionary _RouteValues;
+        RouteData _RouteData;
         /// <summary>
-        /// 获取路由中URL参数值和默认值的集合
+        /// 从当前Http路由请求的上下文中获取路由数据
         /// </summary>
-        public RouteValueDictionary RouteValues
+        public RouteData RouteData
         {
-            get
-            {
-                if (_RouteValues == null)
-                    _RouteValues = ((IRouteable)this).RequestContext.GetRouteParamCollection();
-                return _RouteValues;
+            get {
+                if (_RouteData == null)
+                    _RouteData = ((IRouteable)this).RequestContext.GetRouteData();
+                return _RouteData;
             }
         }
 
         /// <summary>
-        /// 获取路由中指定名称的URL参数的值
+        /// 从当前Http路由请求的上下文中获取指定名称的路由参数的值
         /// </summary>
-        /// <param name="key">名称</param>
+        /// <param name="name">路由参数的名称</param>
         /// <returns></returns>
-        public object GetRouteValue(string key)
+        public object GetRouteValue(string name)
         {
-            return RouteValues.GetRouteValue(key);
+            return ((IRouteable)this).RequestContext.GetRouteValue(name);
         }
 
         /// <summary>

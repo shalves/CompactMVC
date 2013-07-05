@@ -1,7 +1,7 @@
 ﻿namespace System.Web.Routing
 {
     /// <summary>
-    /// 用于实现处理Http路由参数的约定
+    /// 为实现对Http路由数据的处理提供接口支持
     /// </summary>
     internal interface IRouteable
     {

@@ -127,7 +127,6 @@ namespace System.Json
         {
             return ((IJson)this).GetJsonString();
         }
-
         
         #region IJson成员
         string IJson.GetJsonString()
