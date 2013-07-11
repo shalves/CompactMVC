@@ -6,6 +6,11 @@
     public interface IActionExecutor
     {
         /// <summary>
+        /// 获取处理当前Http路由请求的控制器实例
+        /// </summary>
+        IController Controller { get; }
+
+        /// <summary>
         /// 获取或设置操作方法的选择器
         /// </summary>
         IActionMethodSelector ActionSelector { get; set; }

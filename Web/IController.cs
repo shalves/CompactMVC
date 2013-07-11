@@ -3,7 +3,7 @@
 namespace System.Web
 {
     /// <summary>
-    /// 用于在支持Http路由的Mvc Web应用程序中实现Controller的约定
+    /// 用于在支持Http路由的Mvc Web应用程序中实现控制器（Controller）的约定
     /// </summary>
     public interface IController : IActionExecutor
     {

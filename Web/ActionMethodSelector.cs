@@ -20,18 +20,20 @@ namespace System.Web
             get { return Type.DefaultBinder; }
         }
 
-        event EventHandler<ActionAttributeValidateFailedEventArgs> ActionAttributeValidateFailed;
+        event EventHandler<ActionAttributeValidateFailedEventArgs> _ActionAttributeValidateFailed;
         event EventHandler<ActionAttributeValidateFailedEventArgs> IActionMethodSelector.ActionAttributeValidateFailed
         {
-            add { this.ActionAttributeValidateFailed += value; }
-            remove { this.ActionAttributeValidateFailed -= value; }
+            add { this._ActionAttributeValidateFailed += value; }
+            remove { this._ActionAttributeValidateFailed -= value; }
         }
 
         /// <summary>
         /// 初始化 ActionMethodSelector 类的新实例
         /// </summary>
-        public ActionMethodSelector() {
-            this.ActionAttributeValidateFailed = new EventHandler<ActionAttributeValidateFailedEventArgs>(OnActionAttributeValidateFailed);
+        public ActionMethodSelector() 
+        {
+            this._ActionAttributeValidateFailed = 
+                new EventHandler<ActionAttributeValidateFailedEventArgs>(OnActionAttributeValidateFailed);
         }
 
         /// <summary>
@@ -40,7 +42,8 @@ namespace System.Web
         /// <param name="controller"></param>
         /// <param name="e"></param>
         /// <returns></returns>
-        protected virtual void OnActionAttributeValidateFailed(object controller, ActionAttributeValidateFailedEventArgs e)
+        protected virtual void OnActionAttributeValidateFailed(
+            object controller, ActionAttributeValidateFailedEventArgs e)
         {
             var Response = ((IController)controller).ControllerContext.HttpContext.Response;
             var Request = ((IController)controller).ControllerContext.HttpContext.Request;
@@ -50,15 +53,13 @@ namespace System.Web
                 var httpAttr = e.InvalidAttribute as HttpMethodAttribute;
                 if (!string.IsNullOrEmpty(httpAttr.RedirectUrl))
                 {
-                    string url = httpAttr.PreserveQueryString 
-                        ? httpAttr.RedirectUrl + Request.Url.Query 
-                        : httpAttr.RedirectUrl;
+                    string url = 
+                        httpAttr.ReserveQueryString ? httpAttr.RedirectUrl + Request.Url.Query : httpAttr.RedirectUrl;
                     Response.Redirect(url);
                 }
                 else
                 {
-                    throw new HttpException(
-                        string.Format("控制器 \"{0}\" 的 \"{1}\" Action 不接受类型为 \"{2}\" 的HTTP请求", e.ControllerName, e.ActionName, Request.HttpMethod));
+                    Response.Send405(httpAttr.Allow);
                 }
             }
             else if (e.InvalidAttribute is AuthenticationAttribute)
@@ -80,7 +81,7 @@ namespace System.Web
         }
 
         /// <summary>
-        /// 从当前Http路由请求和处理请求的控制器信息获取操作方法信息
+        /// 依据当前Http路由请求和处理请求的控制器信息获取操作方法信息
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
@@ -102,7 +103,7 @@ namespace System.Web
                         {
                             var eventArgs =
                                 new ActionAttributeValidateFailedEventArgs(context.Controller.Name, context.ActionName, attr);
-                            this.ActionAttributeValidateFailed(context.Controller, eventArgs);
+                            this._ActionAttributeValidateFailed(context.Controller, eventArgs);
                             break;
                         }
                     }

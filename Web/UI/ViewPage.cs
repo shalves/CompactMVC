@@ -7,8 +7,13 @@ namespace System.Web.UI
     /// 表示包含有ViewData和ViewModel属性的WebForm视图页面
     /// </summary>
     [FileLevelControlBuilder(typeof(ViewPageControlBuilder))]
-    public class ViewPage : RouteablePage//, IReadOnlySessionState
+    public class ViewPage : RouteablePage
     {
+        string _Name;
+        string _VirtualPath;
+        ViewDataDictionary _ViewData;
+        object _ViewModel;
+
         /// <summary>
         /// 获取或设置页的标题
         /// </summary>
@@ -45,7 +50,6 @@ namespace System.Web.UI
             set { ViewData["$_Meta_Description"] = value; }
         }
 
-        string _Name;
         /// <summary>
         /// 获取当前视图页面在映射表中的名称
         /// </summary>
@@ -54,7 +58,6 @@ namespace System.Web.UI
             get { return _Name; }
         }
 
-        string _VirtualPath;
         /// <summary>
         /// 获取当前视图页面文件的虚拟路径
         /// </summary>
@@ -63,7 +66,6 @@ namespace System.Web.UI
             get { return _VirtualPath; }
         }
 
-        ViewDataDictionary _ViewData;
         /// <summary>
         /// 获取当前视图页的视图数据
         /// </summary>
@@ -72,7 +74,6 @@ namespace System.Web.UI
             get { return _ViewData; }
         }
 
-        object _ViewModel;
         /// <summary>
         /// 获取当前视图页的页面模型
         /// </summary>
@@ -82,12 +83,12 @@ namespace System.Web.UI
         }
 
         /// <summary>
-        /// 初始化ViewPage类的实例
+        /// 初始化 ViewPage 类的实例
         /// </summary>
         public ViewPage()
             : base()
         {
-            _ViewData = new ViewDataDictionary
+            this._ViewData = new ViewDataDictionary
             { 
                 {"$_Page_Title", "New View Page"},
                 {"$_Meta_ContentType", "text/html; charset=utf-8"},

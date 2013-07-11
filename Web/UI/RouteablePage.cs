@@ -7,20 +7,23 @@ namespace System.Web.UI
     /// </summary>
     public class RouteablePage : Page, IRouteable
     {
-        RequestContext IRouteable.RequestContext { get; set; }
-
+        RequestContext _RequestContext;
         RouteData _RouteData;
+
+        #region IRouteable 成员
+        RequestContext IRouteable.RequestContext 
+        {
+            get { return this._RequestContext; }
+            set { this._RequestContext = value; }
+        }
+        #endregion
+
         /// <summary>
         /// 从当前Http路由请求的上下文中获取路由数据
         /// </summary>
         public RouteData RouteData
         {
-            get
-            {
-                if (_RouteData == null)
-                    _RouteData = ((IRouteable)this).RequestContext.GetRouteData();
-                return _RouteData;
-            }
+            get { return _RequestContext == null ? null : _RequestContext.RouteData; }
         }
 
         /// <summary>
@@ -30,7 +33,11 @@ namespace System.Web.UI
         /// <returns></returns>
         public object GetRouteValue(string name)
         {
-            return ((IRouteable)this).RequestContext.GetRouteValue(name);
+            if (RouteData == null) return null;
+            object value = null;
+            if (RouteData.Values.Count > 0)
+                RouteData.Values.TryGetValue(name, out value);
+            return value;
         }
     }
 }

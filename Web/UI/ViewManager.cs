@@ -8,19 +8,19 @@ namespace System.Web.UI
     /// </summary>
     public static class ViewManager
     {
-        static NameValueCollection _ViewList;
+        readonly static NameValueCollection _ViewList;
 
         /// <summary>
         /// 视图名称与视图页面文件路径的集合
         /// </summary>
         public static NameValueCollection Views
         {
-            get 
-            {
-                if (_ViewList == null)
-                    _ViewList = new NameValueCollection();
-                return _ViewList;
-            }
+            get { return _ViewList; }
+        }
+
+        static ViewManager()
+        {
+            _ViewList = new NameValueCollection();
         }
 
         /// <summary>

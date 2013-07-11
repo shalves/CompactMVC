@@ -5,10 +5,10 @@ namespace System.Extensions
     public static partial class IntExts
     {
         /// <summary>
-        /// 返回由该int数据中所有元素组成的带有指定分隔符的字符串形式
+        /// 返回由该int数据中所有元素组成的带有指定分隔符的字符串
         /// </summary>
         /// <param name="array"></param>
-        /// <param name="separator">指定的分隔符</param>
+        /// <param name="separator">指定分隔符</param>
         /// <returns></returns>
         public static string Merge(this int[] array, char separator)
         {

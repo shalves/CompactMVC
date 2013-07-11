@@ -3,20 +3,21 @@
     /// <summary>
     /// 用于创建Web路由处理程序的工厂类
     /// </summary>
-    public sealed class WebRouteHandlerFactory : IRouteHandlerFactory
+    public sealed class WebRouteHandlerFactory : RouteHandlerFactory
     {
         readonly string _HandlerDirectory;
+        readonly string _HandlerPostfix;
+
         /// <summary>
-        /// 获取路由请求处理程序文件所在目录的虚拟路径
+        /// 获取Http路由请求处理程序文件所在目录的虚拟路径
         /// </summary>
         public string HandlerDirectory
         {
             get { return _HandlerDirectory; }
         }
 
-        readonly string _HandlerPostfix;
         /// <summary>
-        /// 获取路由请求处理程序文件名的后缀部分
+        /// 获取Http路由请求处理程序文件名的后缀部分
         /// </summary>
         public string HandlerPostfix
         {
@@ -24,7 +25,7 @@
         }
 
         /// <summary>
-        /// 初始化WebRouteHandlerFactory的新实例
+        /// 初始化 WebRouteHandlerFactory 类的新实例
         /// </summary>
         /// <param name="handlerDirectory">
         /// 指定路由请求处理程序文件所在目录的虚拟路径
@@ -36,7 +37,7 @@
         }
 
         /// <summary>
-        /// 初始化WebRouteHandlerFactory的新实例
+        /// 初始化 WebRouteHandlerFactory 类的新实例
         /// </summary>
         /// <param name="handlersDirectory">
         /// 指定Web路由处理程序文件所在的目录的虚拟路径
@@ -50,11 +51,11 @@
         }
 
         /// <summary>
-        /// 创建路由请求处理程序的新实例
+        /// 创建Http路由请求处理程序的新实例
         /// </summary>
-        /// <param name="handlerToken">路由请求处理程序的特征名</param>
+        /// <param name="handlerToken">指定Http路由请求处理程序的特征名</param>
         /// <returns></returns>
-        public IRouteHandler CreateRouteHandler(string handlerToken)
+        public override IRouteHandler CreateRouteHandler(string handlerToken)
         {
             if (string.IsNullOrEmpty(HandlerDirectory))
             {

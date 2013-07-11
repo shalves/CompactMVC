@@ -29,7 +29,7 @@ namespace System.Web.Security
             get { return UserIdentity != null; }
         }
 
-        #region FormsAuthentication 的静态属性
+        #region 基于 FormsAuthentication 的静态属性
         public string DefaultUrl
         {
             get { return FormsAuthentication.DefaultUrl; }
@@ -38,6 +38,16 @@ namespace System.Web.Security
         public string LoginUrl
         {
             get { return FormsAuthentication.LoginUrl; }
+        }
+
+        public string CookieDomain
+        {
+            get { return FormsAuthentication.CookieDomain; }
+        }
+
+        public HttpCookieMode CookieMode
+        {
+            get { return FormsAuthentication.CookieMode; }
         }
 
         public string FormsCookieName
@@ -82,11 +92,12 @@ namespace System.Web.Security
         /// 使用当前Http请求的上下文信息初始化 FormsAuthenticationHelper 类的新实例
         /// </summary>
         /// <param name="context"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public FormsAuthenticationHelper(HttpContextBase context)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
-            _Context = context;
+            this._Context = context;
             UserIdentity = context.User == null ? null : context.User.Identity as FormsIdentity;
         }
 
@@ -140,18 +151,15 @@ namespace System.Web.Security
         public void Certificate(
             string userName, string userData, string roles, double expiration, string cookiePath)
         {
-            if (!IsAuthenticated)
-            {
-                FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(
+            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(
                     1, userName, DateTime.Now, DateTime.Now.AddMinutes(expiration), true, string.Format("name={0}&userdata={1}&roles={2}", userName, userData, roles));
-                HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(ticket));
-                cookie.Domain = FormsAuthentication.CookieDomain;
-                cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
-                cookie.Expires = ticket.Expiration;
-                Response.Cookies.Set(cookie);
-                UserIdentity = new FormsIdentity(ticket);
-                _Context.User = new GenericPrincipal(UserIdentity, roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            }
+            HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(ticket));
+            cookie.Domain = FormsAuthentication.CookieDomain;
+            cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
+            cookie.Expires = ticket.Expiration;
+            Response.Cookies.Set(cookie);
+            UserIdentity = new FormsIdentity(ticket);
+            this._Context.User = new GenericPrincipal(UserIdentity, roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
         }
 
         /// <summary>
@@ -174,17 +182,14 @@ namespace System.Web.Security
         /// <param name="cookiePath">保存Forms认证凭据的Cookie的路径（以“/”开头）</param>
         public void SignOut(string cookiePath)
         {
-            if (IsAuthenticated)
-            {
-                HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, string.Empty); ;
-                cookie.Domain = FormsAuthentication.CookieDomain;
-                cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
-                cookie.Expires = DateTime.Now.AddDays(-1D);
-                Response.SetCookie(cookie);
-                if (Session != null) Session.Abandon();
-                UserIdentity = null;
-                _Context.User = null;
-            }
+            HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, string.Empty); ;
+            cookie.Domain = FormsAuthentication.CookieDomain;
+            cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
+            cookie.Expires = DateTime.Now.AddDays(-1D);
+            Response.SetCookie(cookie);
+            if (Session != null) Session.Abandon();
+            UserIdentity = null; 
+            this._Context.User = null;
         }
 
         /// <summary>

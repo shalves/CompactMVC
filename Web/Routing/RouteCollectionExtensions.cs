@@ -2,13 +2,11 @@
 {
     public static class RouteCollectionExtensions
     {
-        static IRouteHandlerFactory _RouteHandlerFactory;
-
         static IRouteHandler GetRouteHandler(string handlerToken)
         {
-            if (_RouteHandlerFactory == null)
-                throw new ArgumentException("未指定用于创建Http路由请求处理程序的工厂类对象", "IRouteHandlerFactory");
-            return _RouteHandlerFactory.CreateRouteHandler(handlerToken);
+            if (RouteHandlerFactory.Current == null)
+                throw new ArgumentException("未指定用于创建Http路由请求处理程序的工厂类对象", "RouteHandlerFactory.Current");
+            return RouteHandlerFactory.Current.CreateRouteHandler(handlerToken);
         }
 
         /// <summary>
@@ -18,11 +16,11 @@
         /// <param name="routeHandlerFactory"></param>
         public static void SetRouteHandlerFactory(this RouteCollection routes, IRouteHandlerFactory routeHandlerFactory)
         {
-            _RouteHandlerFactory = routeHandlerFactory;
+            RouteHandlerFactory.SetRouteHandlerFactory(routeHandlerFactory);
         }
 
         /// <summary>
-        /// 忽略对指定路径规则的路由
+        /// 忽略对指定路径规则的Http请求的路由
         /// </summary>
         /// <param name="routes"></param>
         /// <param name="constraints"></param>

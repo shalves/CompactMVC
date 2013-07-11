@@ -19,11 +19,14 @@ namespace System.Collections.Specialized
             set { BaseSet(index, value); }
         }
 
+        /// <summary>
+        /// 初始化 NameObjectCollection 类的新实例
+        /// </summary>
         public NameObjectCollection()
         { }
 
         /// <summary>
-        /// 初始化NameObjectCollection的新实例
+        /// 初始化 NameObjectCollection 类的新实例
         /// </summary>
         /// <param name="anonymous">指定用于初始化集合的匿名对象</param>
         public NameObjectCollection(object anonymous)
@@ -69,7 +72,7 @@ namespace System.Collections.Specialized
         }
 
         /// <summary>
-        /// 将匿名对象的属性和数据映射到当前集合
+        /// 将匿名对象的属性数据映射到当前集合
         /// </summary>
         /// <param name="anonymous"></param>
         public virtual void Add(object anonymous)

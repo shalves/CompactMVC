@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Json;
 using System.Security.Principal;
 using System.Text;
 using System.Web.Caching;
@@ -15,9 +14,13 @@ namespace System.Web
     /// </summary>
     public abstract class Controller : IController, IHttpHandler, IRequiresSessionState
     {
+        readonly string _Name;
         HttpContextBase _HttpContext;
         ControllerContext _ControllerContext;
+        ViewDataDictionary _ViewData;
         FormsAuthenticationHelper _FormsAuthentication;
+        RequestRouter _RouteRequest;
+        JavaScriptCollection _ViewScripts;
 
         #region IHttpHandler 成员
         bool IHttpHandler.IsReusable
@@ -38,12 +41,12 @@ namespace System.Web
         /// </summary>
         public virtual string Name
         {
-            get { return this.GetType().Name; }
+            get { return this._Name; }
         }
 
         ControllerContext IController.ControllerContext 
         {
-            get { return _ControllerContext; }
+            get { return this._ControllerContext; }
         }
 
         void IController.Initialize(RequestContext requestContext)
@@ -51,12 +54,16 @@ namespace System.Web
             this._HttpContext = requestContext.HttpContext;
             this._ControllerContext = new ControllerContext(requestContext, this);
             ControllerInitializer.Default.InitializeController(this);
-            this._ViewData = new ViewDataDictionary();
             this.Initialize(requestContext);
         }
         #endregion
 
         #region IActionExecutor 成员
+        IController IActionExecutor.Controller
+        {
+            get { return this; }
+        }
+
         IActionMethodSelector IActionExecutor.ActionSelector { get; set; }
 
         event EventHandler _PreActionExecute;
@@ -66,18 +73,18 @@ namespace System.Web
             remove { this._PreActionExecute -= value; }
         }
 
-        event EventHandler<ActionEventArgs> ActionNotFound;
+        event EventHandler<ActionEventArgs> _ActionNotFound;
         event EventHandler<ActionEventArgs> IActionExecutor.ActionNotFound
         {
-            add { this.ActionNotFound += value; }
-            remove { this.ActionNotFound -= value; }
+            add { this._ActionNotFound += value; }
+            remove { this._ActionNotFound -= value; }
         }
 
-        event EventHandler<ActionExecutionErrorEventArgs> ActionExecutionError;
+        event EventHandler<ActionExecutionErrorEventArgs> _ActionExecutionError;
         event EventHandler<ActionExecutionErrorEventArgs> IActionExecutor.ActionExecutionError
         {
-            add { this.ActionExecutionError += value; }
-            remove { this.ActionExecutionError -= value; }
+            add { this._ActionExecutionError += value; }
+            remove { this._ActionExecutionError -= value; }
         }
 
         /// <summary>
@@ -87,7 +94,7 @@ namespace System.Web
         {
             if (action == null)
             {
-                if (ActionNotFound != null) ActionNotFound(this, new ActionEventArgs(Name, ControllerContext.ActionName));
+                if (_ActionNotFound != null) _ActionNotFound(this, new ActionEventArgs(Name, ControllerContext.ActionName));
                 var op = OnActionNotFound();
                 switch (op.ToDo)
                 {
@@ -109,7 +116,7 @@ namespace System.Web
                 }
                 catch (Exception e)
                 {
-                    if (ActionExecutionError != null) ActionExecutionError(this, new ActionExecutionErrorEventArgs(Name, ControllerContext.ActionName, e));
+                    if (_ActionExecutionError != null) _ActionExecutionError(this, new ActionExecutionErrorEventArgs(Name, ControllerContext.ActionName, e));
                     var op = OnActionExecutionError(e);
                     switch (op.ToDo)
                     {
@@ -123,93 +130,6 @@ namespace System.Web
             }
         }
         #endregion
-
-        /// <summary>
-        /// 获取有关处理当前Http路由请求的控制器上下文件信息
-        /// </summary>
-        protected internal ControllerContext ControllerContext
-        {
-            get { return this._ControllerContext; }
-        }
-
-        /// <summary>
-        /// 从当前Http路由请求上下文中获取路由数据
-        /// </summary>
-        protected internal RouteData RouteData
-        {
-            get { return ControllerContext.RouteData; }
-        }
-
-        ViewDataDictionary _ViewData;
-        /// <summary>
-        /// 获取视图数据的集合
-        /// <para>在呈现视图时，将会合并该集合到要呈现视图的数据集合中</para>
-        /// </summary>
-        protected internal ViewDataDictionary ViewData
-        {
-            get { return _ViewData; }
-        }
-
-        /// <summary>
-        /// 为控制器提供Froms认证的原生支持
-        /// </summary>
-        protected internal FormsAuthenticationHelper FormsAuthentication
-        {
-            get
-            {
-                if (this._FormsAuthentication == null)
-                    this._FormsAuthentication = new FormsAuthenticationHelper(Context);
-                return this._FormsAuthentication;
-            }
-        }
-
-        /// <summary>
-        /// 使用Http路由请求的上下文信息初始化当前控制器的自定义设置
-        /// </summary>
-        /// <param name="requestContext"></param>
-        protected internal virtual void Initialize(RequestContext requestContext) { }
-
-        /// <summary>
-        /// 控制器执行的主入口方法
-        /// </summary>
-        private void OnProcessRequest()
-        {
-            //调用预置方法
-            if (_PreActionExecute != null)
-                _PreActionExecute(this, new ActionEventArgs(Name, ControllerContext.ActionName));
-            PreActionExecute();
-
-            //获取操作方法
-            ActionMethodInfo action = ((IActionExecutor)this).ActionSelector.GetActionMethod(ControllerContext);
-
-            //执行操作方法
-            ((IActionExecutor)this).ExecuteAction(action);
-        }
-
-        /// <summary>
-        /// 在执行请求的操作方法之前要执行的操作
-        /// </summary>
-        protected virtual void PreActionExecute() { }
-
-        /// <summary>
-        /// 当请求的操作方法未找到时要执行的操作
-        /// </summary>
-        protected virtual DecisiveOperatingInstruction OnActionNotFound()
-        {
-            return DecisiveOperatingInstruction.ThrowException(
-                new Exception(string.Format("控制器 \"{0}\" 中不存在名为 \"{1}\" 的 Action", Name, ControllerContext.ActionName)));
-        }
-
-        /// <summary>
-        /// 在执行请求的操作方法出错时要执行的操作
-        /// </summary>
-        /// <param name="baseException"></param>
-        /// <returns></returns>
-        protected virtual DecisiveOperatingInstruction OnActionExecutionError(Exception baseException)
-        {
-            return DecisiveOperatingInstruction.ThrowException(
-                new Exception(string.Format("在执行控制器 \"{0}\" 的 \"{1}\" Action 时遇到错误", Name, ControllerContext.ActionName), baseException));
-        }
 
         #region 常用的ASP.NET对象
         /// <summary>
@@ -282,48 +202,136 @@ namespace System.Web
         /// </summary>
         public HttpVerb HttpMethod
         {
-            get { return Request == null ? HttpVerb.None : Request.HttpMethod.ToHttpVerb(); }
+            get { return Request == null ? HttpVerb.NULL : Request.HttpMethod.ToHttpVerb(); }
         }
         #endregion
 
-        #region 通用的响应
         /// <summary>
-        /// 响应JS文本到客户端
+        /// 获取有关处理当前Http路由请求的控制器上下文件信息
         /// </summary>
-        /// <param name="script"></param>
-        protected internal void ResponseJavaScript(JavaScript script)
+        protected internal ControllerContext ControllerContext
         {
-            Response.ContentType = "text/html; charset=utf-8";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.Write(script.ToString());
-            Response.Flush();
+            get { return this._ControllerContext; }
         }
 
         /// <summary>
-        /// 响应Json文本到客户端
+        /// 从当前Http路由请求上下文中获取路由数据
         /// </summary>
-        /// <param name="jsonResult"></param>
-        protected internal void ResponseJson(IJson jsonResult)
+        protected internal RouteData RouteData
         {
-            Response.ContentType = "text/plain; charset=utf-8";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.Write(jsonResult.GetJsonString());
-            Response.Flush();
+            get { return ControllerContext.RouteData; }
         }
 
         /// <summary>
-        /// 响应Jsonp文本到客户端
+        /// 获取视图数据的集合
+        /// <para>在呈现视图时，将会合并该集合到要呈现视图的数据集合中</para>
         /// </summary>
-        /// <param name="callBack">客户端的js回调方法</param>
-        /// <param name="jsonParam">json参数</param>
-        protected internal void ResponseJsonp(string callBack, IJson jsonParam)
+        protected internal ViewDataDictionary ViewData
         {
-            Response.ContentType = "text/plain; charset=utf-8";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.Write(string.Format("{0}({1});", callBack, jsonParam.GetJsonString()));
-            Response.Flush();
+            get
+            {
+                if (this._ViewData == null)
+                    this._ViewData = new ViewDataDictionary();
+                return this._ViewData;
+            }
         }
-        #endregion
+
+        /// <summary>
+        /// 获取视图脚本的集合
+        /// <para>在呈现视图时，将会在视图中注册这些脚本</para>
+        /// </summary>
+        protected internal JavaScriptCollection ViewScripts
+        {
+            get
+            {
+                if (_ViewScripts == null)
+                    _ViewScripts = new JavaScriptCollection();
+                return _ViewScripts;
+            }
+        }
+
+        /// <summary>
+        /// 为控制器提供Froms认证的原生支持
+        /// </summary>
+        protected internal FormsAuthenticationHelper FormsAuthentication
+        {
+            get
+            {
+                if (this._FormsAuthentication == null)
+                    this._FormsAuthentication = new FormsAuthenticationHelper(Context);
+                return this._FormsAuthentication;
+            }
+        }
+
+        /// <summary>
+        /// 获取一个允许在路由间转移Http路由请求的转发器
+        /// </summary>
+        /// <returns></returns>
+        protected internal RequestRouter RouteRequest
+        {
+            get
+            {
+                if (this._RouteRequest == null)
+                    this._RouteRequest = new RequestRouter(Context);
+                return this._RouteRequest;
+            }
+        }
+
+        /// <summary>
+        /// 初始化 Controller 类的新实例
+        /// </summary>
+        public Controller()
+        {
+            this._Name = this.GetType().Name; 
+        }
+
+        /// <summary>
+        /// 使用Http路由请求的上下文信息初始化当前控制器的自定义设置
+        /// </summary>
+        /// <param name="requestContext"></param>
+        protected internal virtual void Initialize(RequestContext requestContext) { }
+
+        /// <summary>
+        /// 控制器执行的主入口方法
+        /// </summary>
+        private void OnProcessRequest()
+        {
+            //调用预置方法
+            if (this._PreActionExecute != null)
+                this._PreActionExecute(this, new ActionEventArgs(Name, ControllerContext.ActionName));
+            PreActionExecute();
+
+            //获取操作方法
+            ActionMethodInfo action = ((IActionExecutor)this).ActionSelector.GetActionMethod(ControllerContext);
+
+            //执行操作方法
+            ((IActionExecutor)this).ExecuteAction(action);
+        }
+
+        /// <summary>
+        /// 在执行请求的操作方法之前要执行的操作
+        /// </summary>
+        protected virtual void PreActionExecute() { }
+
+        /// <summary>
+        /// 当请求的操作方法未找到时要执行的操作
+        /// </summary>
+        protected virtual DecisiveOperatingInstruction OnActionNotFound()
+        {
+            return DecisiveOperatingInstruction.ThrowException(
+                new Exception(string.Format("控制器 \"{0}\" 中不存在名为 \"{1}\" 的 Action", Name, ControllerContext.ActionName)));
+        }
+
+        /// <summary>
+        /// 在执行请求的操作方法出错时要执行的操作
+        /// </summary>
+        /// <param name="baseException"></param>
+        /// <returns></returns>
+        protected virtual DecisiveOperatingInstruction OnActionExecutionError(Exception baseException)
+        {
+            return DecisiveOperatingInstruction.ThrowException(
+                new Exception(string.Format("在执行控制器 \"{0}\" 的 \"{1}\" Action 时遇到错误", Name, ControllerContext.ActionName), baseException));
+        }
 
         #region 呈现视图的方法
         /// <summary>
@@ -331,7 +339,7 @@ namespace System.Web
         /// </summary>
         protected internal void RenderView()
         {
-            RenderView(this.ControllerContext.ActionName);
+            RenderView(ControllerContext.ActionName);
         }
 
         /// <summary>
@@ -349,7 +357,7 @@ namespace System.Web
         /// <param name="viewModel">要绑定的视图模型对象</param>
         protected internal void RenderView(object viewModel)
         {
-            RenderView(this.ControllerContext.ActionName, viewModel);
+            RenderView(ControllerContext.ActionName, viewModel);
         }
 
         /// <summary>
@@ -367,12 +375,10 @@ namespace System.Web
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        /// <param name="preserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
-        protected internal void RenderView(string viewName, object viewModel, bool preserveForm)
+        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
+        protected internal void RenderView(string viewName, object viewModel, bool reserveForm)
         {
-            var newPage = ViewManager.ResolveView(viewName, viewModel);
-            newPage.ViewData.MergeFrom(ViewData);
-            RenderView(newPage, preserveForm);
+            RenderView(IntegrateView(ViewManager.ResolveView(viewName, viewModel)), reserveForm);
         }
 
         /// <summary>
@@ -382,7 +388,7 @@ namespace System.Web
         /// <param name="viewModel">要绑定的视图模型对象</param>
         protected internal void RenderView<T>(T viewModel)
         {
-            RenderView<T>(this.ControllerContext.ActionName, viewModel);
+            RenderView<T>(ControllerContext.ActionName, viewModel);
         }
 
         /// <summary>
@@ -402,76 +408,110 @@ namespace System.Web
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        /// <param name="preserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
-        protected internal void RenderView<T>(string viewName, T viewModel, bool preserveForm)
+        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
+        protected internal void RenderView<T>(string viewName, T viewModel, bool reserveForm)
         {
-            var newPage = ViewManager.ResolveView<T>(viewName, viewModel);
-            newPage.ViewData.MergeFrom(ViewData);
-            RenderView(newPage, preserveForm);
+            RenderView(IntegrateView(ViewManager.ResolveView<T>(viewName, viewModel)), reserveForm);
+        }
+
+        ViewPage IntegrateView(ViewPage view)
+        {
+            //整合视图数据
+            if (_ViewData != null)
+                view.ViewData.MergeFrom(_ViewData);
+
+            //整合视图脚本
+            if (_ViewScripts != null)
+            {
+                foreach (var script in _ViewScripts)
+                {
+                    view.ClientScript.RegisterClientScriptBlock(view.GetType(), "", script.ToString());
+                }
+            }
+
+            view.ViewData["$_Controller"] = Name;
+            view.ViewData["$_Action"] = ControllerContext.ActionName;
+
+            return view;
         }
 
         /// <summary>
         /// 呈现指定的视图实例
         /// </summary>
         /// <param name="view">要呈现的视图</param>
-        /// <param name="preserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
-        protected internal void RenderView(ViewPage view, bool preserveForm)
+        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
+        protected internal void RenderView(ViewPage view, bool reserveForm)
         {
-            //Context.RewritePath(view.VirtualPath);
             if (view is IRouteable)
-                ((IRouteable)view).RequestContext = this.ControllerContext.RequestContext;
-            view.ViewData["$_Controller"] = Name;
-            view.ViewData["$_Action"] = this.ControllerContext.ActionName;
-            //Server.Transfer(view, preserveForm);
-            Server.Execute(view, null, preserveForm);
+                ((IRouteable)view).RequestContext = ControllerContext.RequestContext;
+            Server.Execute(view, null, reserveForm);
         }
         #endregion
 
-        #region 特殊方法
+        #region Helper 方法
         /// <summary>
-        /// 获取路由参数集合中指定名称的参数的值
+        /// 对指定文本进行Url编码
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="text"></param>
         /// <returns></returns>
-        protected internal object GetRouteValue(string name)
+        protected string UrlEncode(string text)
         {
-            return this.ControllerContext.RequestContext.GetRouteValue(name);
+            return HttpUtility.UrlEncode(text);
         }
 
         /// <summary>
-        /// 将浏览器以HTTP POST的请求类型重定向到目标Url，并将formData数据附加到Request.Form集合中
+        /// 对Url编码的文本进行解码
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        protected string UrlDecode(string text)
+        {
+            return HttpUtility.UrlDecode(text);
+        }
+
+        /// <summary>
+        /// 对指定文本进行Html编码
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        protected string HtmlEncode(string text)
+        {
+            return HttpUtility.HtmlEncode(text);
+        }
+
+        /// <summary>
+        /// 对Html编码的文本进行解码
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        protected string HtmlDecode(string text)
+        {
+            return HttpUtility.HtmlDecode(text);
+        }
+
+        /// <summary>
+        /// 将浏览器以HTTP POST方式重定向到目标Url，并将formData数据附加到Request.Form集合中
         /// <para>不支持Ajax请求</para>
         /// </summary>
-        /// <param name="targetUrl">目标url(支持"~/"的写法,支持url附带参数)</param>
+        /// <param name="url">目标url（支持"~/"的写法，支持url附带参数）</param>
         /// <param name="formData">要附加到Request.Form集合中的数据</param>
-        /// <param name="preserveForm">是否保留原始的Request.QueryString和Request.Form集合</param>
-        protected void PostRedirect(string targetUrl, NameValueCollection formData, bool preserveForm)
+        /// <param name="reserveForm">是否保留原始的Request.QueryString和Request.Form集合</param>
+        protected void PostRedirect(string url, NameValueCollection formData, bool reserveForm)
         {
-            if (targetUrl == null)
+            if (url == null)
                 throw new ArgumentNullException("targetUrl");
 
-            if (formData == null)
-                formData = new NameValueCollection(0);
+            string target = url.Replace("~/", Request.ApplicationPath);
 
-            StringBuilder target =
-                new StringBuilder(targetUrl.Replace("~/", Request.ApplicationPath));
-
-            if (preserveForm)
+            if (reserveForm && !string.IsNullOrEmpty(Request.Url.Query))
             {
-                if (target.ToString().IndexOf('?') > -1)
+                if (target.IndexOf('?') > -1)
                 {
-                    for (int i = 0; i < Request.QueryString.Count; i++)
-                    {
-                        target.AppendFormat("&{0}={1}", Request.QueryString.Keys[i], Request.QueryString[i]);
-                    }
+                    target += string.Format("&{0}", Request.Url.Query.TrimStart('?'));
                 }
                 else
                 {
-                    for (int i = 0; i < Request.QueryString.Count; i++)
-                    {
-                        target.AppendFormat(
-                            "{0}{1}={2}", i == 0 ? "?" : "&", Request.QueryString.Keys[i], Request.QueryString[i]);
-                    }
+                    target += Request.Url.Query;
                 }
             }
 
@@ -479,27 +519,31 @@ namespace System.Web
             html.AppendLine("<!DOCTYPE html>");
             html.AppendLine("<html>");
             html.AppendLine("<head>");
-            html.AppendLine(" <title>PostRedirectPage</title>");
+            html.AppendLine("   <title>RedirectPage</title>");
             html.AppendLine("</head>");
             html.AppendLine("<body>");
-            html.AppendFormat(" <form id=\"form1\" action=\"{0}\" method=\"post\" {1}>\r\n", target.ToString());
+            html.AppendFormat("<form id=\"form1\" action=\"{0}\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">\r\n", target.ToString());
 
-            if (preserveForm)
+            if (reserveForm)
             {
                 for (int i = 0; i < Request.Form.Count; i++)
                 {
                     html.AppendFormat(
-                        "       <input id=\"{0}\" name=\"{0}\" value=\"{1}\" type=\"hidden\" />\r\n", Request.Form.Keys[i], Request.Form[i]);
+                        "   <input id=\"{0}\" name=\"{0}\" value=\"{1}\" type=\"hidden\" />\r\n", Request.Form.Keys[i], Request.Form[i]);
                 }
             }
 
-            for (int i = 0; i < formData.Count; i++)
+            if (formData != null)
             {
-                html.AppendFormat(
-                    "       <input id=\"{0}\" name=\"{0}\" value=\"{1}\" type=\"hidden\" />\r\n", formData.Keys[i], formData[i]);
+                for (int i = 0; i < formData.Count; i++)
+                {
+                    html.AppendFormat(
+                        "   <input id=\"{0}\" name=\"{0}\" value=\"{1}\" type=\"hidden\" />\r\n", formData.Keys[i], formData[i]);
+                }
             }
 
             html.AppendLine("</form>");
+            html.AppendLine("<h2>正在转发请求……</2>");
             html.AppendLine("</body>");
             html.AppendLine("<script type=\"text/javascript\">");
             html.AppendLine("//<![CDATA[");
@@ -511,7 +555,7 @@ namespace System.Web
             html.AppendLine("</script>");
             html.AppendLine("</html>");
 
-            Response.ContentType = "text/html; charset=utf-8";
+            Response.ContentType = "text/html";
             Response.ContentEncoding = Encoding.UTF8;
             Response.Write(html.ToString());
             Response.End();

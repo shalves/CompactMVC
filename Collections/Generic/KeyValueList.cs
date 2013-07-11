@@ -3,15 +3,12 @@
 namespace System.Collections.Generic
 {
     /// <summary>
-    /// 泛型 "Key/Value" 列表 [V1.25]
+    /// 泛型 "Key/&lt;T&gt;Value" 列表 [V1.26]
     /// <para>名称唯一</para>
     /// </summary>
     /// <typeparam name="TValue">集合中元素Value的类型</typeparam>
     public class KeyValueList<TValue> : IEnumerable<TValue>, IEnumerator<TValue>
     {
-        /// <summary>
-        /// 字典集合
-        /// </summary>
         IList<KeyValueListItem<TValue>> _ITEM;
 
         /// <summary>
@@ -54,7 +51,7 @@ namespace System.Collections.Generic
             {
                 int i = IndexOf(key);
                 if (i == -1)
-                    throw new KeyNotFoundException(string.Format("未找到名为\"{0}\"的元素", key));
+                    throw new KeyNotFoundException(string.Format("未找到名为 \"{0}\" 的元素", key));
                 return this[i];
             }
             set
@@ -63,19 +60,23 @@ namespace System.Collections.Generic
             }
         }
 
-        void Init()
+        /// <summary>
+        /// 初始化 KeyValueList 类的新实例
+        /// </summary>
+        public KeyValueList()
         {
             _ITEM = new List<KeyValueListItem<TValue>>();
         }
 
-        public KeyValueList()
-        {
-            Init();
-        }
-
+        /// <summary>
+        /// 初始化 KeyValueList 类的新实例
+        /// <para>指定用于初始化集合的第一个元素的名称和值</para>
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
         public KeyValueList(string key, TValue value)
         {
-            Init();
+            _ITEM = new List<KeyValueListItem<TValue>>();
             Add(key, value);
         }
 
@@ -162,6 +163,7 @@ namespace System.Collections.Generic
 
             int i = IndexOf(key);
 
+            //如果指定Key的元素已存在，则先移除
             if (i > -1) _ITEM.RemoveAt(i);
 
             if (index >= Count-1)
@@ -230,7 +232,7 @@ namespace System.Collections.Generic
             return this;
         }
 
-        #region IEnumerator<T>
+        #region IEnumerator<T> 成员
         int _PTR = -1;
 
         TValue IEnumerator<TValue>.Current
@@ -267,8 +269,7 @@ namespace System.Collections.Generic
         /// <typeparam name="T">元素中Value的类型</typeparam>
         protected class KeyValueListItem<T>
         {
-            private string _Key;
-            private T _Value;
+            readonly string _Key; T _Value;
 
             /// <summary>
             /// 获取该元素的名称
@@ -288,7 +289,7 @@ namespace System.Collections.Generic
             }
 
             /// <summary>
-            /// 创建LiteDictionaryItem元素的新实例
+            /// 创建 KeyValueListItem 类的新实例
             /// </summary>
             /// <param name="key">名称</param>
             /// <param name="value">值</param>

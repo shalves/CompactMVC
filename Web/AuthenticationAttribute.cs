@@ -3,7 +3,7 @@
 namespace System.Web
 {
     /// <summary>
-    /// Action的Authentication标记类
+    /// 操作方法（Action）的 Authentication 标记类
     /// <para>用于限制只有特定的认证用户才可以请求被标记的Action</para>
     /// </summary>
     public sealed class AuthenticationAttribute : ActionAttribute
@@ -34,11 +34,11 @@ namespace System.Web
         /// <param name="roles"></param>
         public AuthenticationAttribute(params string[] roles)
         {
-            _Roles = roles;
+            this._Roles = roles;
         }
 
         /// <summary>
-        /// 验证Action的Authentication标记
+        /// 使用该Authentication标记设置验证当前Http请求
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>

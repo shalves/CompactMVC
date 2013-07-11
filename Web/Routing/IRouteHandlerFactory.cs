@@ -6,7 +6,7 @@
     public interface IRouteHandlerFactory
     {
         /// <summary>
-        /// 创建路由请求处理程序的新实例
+        /// 创建Http路由请求处理程序的新实例
         /// </summary>
         /// <param name="handlerToken"></param>
         /// <returns></returns>

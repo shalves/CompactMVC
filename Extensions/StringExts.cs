@@ -1,12 +1,12 @@
-﻿using System.Text;
-using System.Web;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace System.Extensions
 {
     public static partial class StringExts
     {
         /// <summary>
-        /// 判断当前字符串对象是否为null或string.Empty值
+        /// 指示当前字符串对象是否为null或string.Empty值
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
@@ -16,7 +16,7 @@ namespace System.Extensions
         }
 
         /// <summary>
-        /// 简化string.Format()的用法
+        /// 简化的string.Format()用法
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
@@ -27,7 +27,7 @@ namespace System.Extensions
         }
 
         /// <summary>
-        /// 用指定数量的Unicode字符填充字符串的两侧
+        /// 用指定数量的Unicode字符填充字符串的两端
         /// </summary>
         /// <param name="arg"></param>
         /// <param name="paddingChar"></param>
@@ -59,8 +59,9 @@ namespace System.Extensions
 
         /// <summary>
         /// 复制并转换该字符串数组中的所有元素到int[]
+        /// <para>请确保元素中的所有项都可以转换为int类型</para>
         /// </summary>
-        /// <param name="array">请确保元素中的所有项都可以转换为int类型</param>
+        /// <param name="array"></param>
         /// <exception cref="FormatException"></exception>
         /// <returns></returns>
         public static int[] AsIntArray(this string[] array)
@@ -82,7 +83,7 @@ namespace System.Extensions
         }
 
         /// <summary>
-        /// 对字符串中的',"和\进行转码
+        /// 对字符串中的“'”，“"”和“\”进行转码
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
@@ -114,6 +115,25 @@ namespace System.Extensions
         public static string UrlDecode(this string arg)
         {
             return Uri.UnescapeDataString(arg);
+        }
+
+        /// <summary>
+        /// 返回当前字符串经过MD5加密后的结果
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public static string MD5Encrypt(this string arg)
+        {
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            try
+            {
+                byte[] buffer = md5.ComputeHash(Encoding.UTF8.GetBytes(arg));
+                return BitConverter.ToString(buffer).Replace("-", "");
+            }
+            finally
+            {
+                md5.Clear();
+            }
         }
     }
 }

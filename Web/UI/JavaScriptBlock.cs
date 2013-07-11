@@ -36,6 +36,19 @@ namespace System.Web.UI
             return this;
         }
 
+        public JavaScriptBlock AppendFormatLine(string format, params object[] args)
+        {
+            _ScriptText.AppendLine();
+            _ScriptText.AppendFormat(format, args);
+            return this;
+        }
+
+        public JavaScriptBlock AppendLine()
+        {
+            _ScriptText.AppendLine();
+            return this;
+        }
+
         public JavaScriptBlock AppendLine(string script)
         {
             _ScriptText.AppendLine(script);

@@ -10,9 +10,9 @@ namespace System.Web
     public enum HttpVerb
     {
         /// <summary>
-        /// 清除
+        /// 空值
         /// </summary>
-        None = 0,
+        NULL = 0,
 
         /// <summary>
         /// HTTP GET方法
@@ -43,7 +43,7 @@ namespace System.Web
     public static class HttpVerbExts
     {
         /// <summary>
-        /// 转换HttpMethod字符转换到等效的枚举
+        /// 将 HttpMethod 字符转换到等效的 HttpVerb 枚举
         /// </summary>
         /// <param name="method"></param>
         /// <returns></returns>
@@ -62,7 +62,7 @@ namespace System.Web
                 case "HEAD": 
                     return HttpVerb.HEAD;
                 default: 
-                    return HttpVerb.None;
+                    return HttpVerb.NULL;
             }
         }
     }

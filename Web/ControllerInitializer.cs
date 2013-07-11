@@ -4,7 +4,7 @@ using System.Web.Routing;
 namespace System.Web
 {
     /// <summary>
-    /// 为实现控制器的初始化而定义的全局类型
+    /// 为实现控制器在应用程序级别的全局初始化而定义的类型
     /// </summary>
     public class ControllerInitializer
     {

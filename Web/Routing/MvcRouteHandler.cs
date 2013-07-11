@@ -35,21 +35,23 @@ namespace System.Web.Routing
         internal Assembly GetAssembly()
         {
             if (MvcRouteHandler._Assembly == null)
-                MvcRouteHandler._Assembly = Assembly.Load(this.AssemblyName);
+                MvcRouteHandler._Assembly = Assembly.Load(AssemblyName);
             return MvcRouteHandler._Assembly;
         }
 
         /// <summary>
-        /// 初始化MvcRouteHandler类的新实例
+        /// 初始化 MvcRouteHandler 类的新实例
         /// </summary>
         /// <param name="assemblyName">指定路由请求处理程序所在程序集的名称</param>
         /// <param name="typeName">指定路由请求处理程序的类型名</param>
-        public MvcRouteHandler(string assemblyName, string typeName) { 
+        public MvcRouteHandler(string assemblyName, string typeName) 
+        { 
             this._AssemblyName = assemblyName;
             this._TypeName = typeName;
         }
 
-        IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext) {
+        IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext)
+        {
             try
             {
                 Assembly handlerAssembly = GetAssembly();

@@ -75,9 +75,12 @@ namespace System.Web
         /// <summary>
         /// 从基本方法信息的实例中获取所有Action标记并为Attributes属性赋值
         /// </summary>
-        private void SetActionAttributes() {
-            if (BaseMethod != null) {
-                Attributes = BaseMethod.GetCustomAttributes(typeof(ActionAttribute), false) as ActionAttribute[];
+        private void SetActionAttributes() 
+        {
+            if (BaseMethod != null) 
+            {
+                Attributes = 
+                    BaseMethod.GetCustomAttributes(typeof(ActionAttribute), false) as ActionAttribute[];
             }
         }
     }

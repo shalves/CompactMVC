@@ -10,8 +10,11 @@ namespace System.Web
     /// </summary>
     public abstract class RouteableHttpHandler : IHttpHandler, IRouteable
     {
-        #region IHttpHandler 成员
         bool _IsReusable = false;
+        HttpContext _Context;
+        RequestContext _RequestContext;
+
+        #region IHttpHandler 成员
         public virtual bool IsReusable
         {
             get { return _IsReusable; }
@@ -24,13 +27,20 @@ namespace System.Web
         /// <param name="context"></param>
         void IHttpHandler.ProcessRequest(HttpContext context)
         {
-            _Context = context;
+            this._Context = context;
             OnProcessRequest();
         }
         #endregion
 
+        #region IRouteable 成员
+        RequestContext IRouteable.RequestContext
+        {
+            get { return _RequestContext; }
+            set { _RequestContext = value; }
+        }
+        #endregion
+
         #region 常用的ASP.NET对象
-        HttpContext _Context;
         /// <summary>
         /// 获取当前Http请求的上下文
         /// </summary>
@@ -44,7 +54,7 @@ namespace System.Web
         /// </summary>
         public HttpApplicationState Application
         {
-            get { return Context.Application; }
+            get { return Context == null ? null : Context.Application; }
         }
 
         /// <summary>
@@ -52,7 +62,7 @@ namespace System.Web
         /// </summary>
         public Cache Cache
         {
-            get { return Context.Cache; }
+            get { return Context == null ? null : Context.Cache; }
         }
 
         /// <summary>
@@ -60,7 +70,7 @@ namespace System.Web
         /// </summary>
         public HttpRequest Request
         {
-            get { return Context.Request; }
+            get { return Context == null ? null : Context.Request; }
         }
 
         /// <summary>
@@ -68,7 +78,7 @@ namespace System.Web
         /// </summary>
         public HttpResponse Response
         {
-            get { return Context.Response; }
+            get { return Context == null ? null : Context.Response; }
         }
 
         /// <summary>
@@ -76,7 +86,7 @@ namespace System.Web
         /// </summary>
         public HttpServerUtility Server
         {
-            get { return Context.Server; }
+            get { return Context == null ? null : Context.Server; }
         }
 
         /// <summary>
@@ -84,7 +94,7 @@ namespace System.Web
         /// </summary>
         public HttpSessionState Session
         {
-            get { return Context.Session; }
+            get { return Context == null ? null : Context.Session; }
         }
 
         /// <summary>
@@ -92,8 +102,8 @@ namespace System.Web
         /// </summary>
         public IPrincipal User
         {
-            get { return Context.User; }
-            set { Context.User = value; }
+            get { return Context == null ? null : Context.User; }
+            set { if (Context != null) Context.User = value; }
         }
 
         /// <summary>
@@ -101,23 +111,16 @@ namespace System.Web
         /// </summary>
         public HttpVerb HttpMethod
         {
-            get { return Context.Request.HttpMethod.ToHttpVerb(); }
+            get { return Request == null ? HttpVerb.NULL : Request.HttpMethod.ToHttpVerb(); }
         }
         #endregion
 
-        RequestContext IRouteable.RequestContext { get; set; }
-
-        RouteData _RouteData;
         /// <summary>
         /// 从当前Http路由请求的上下文中获取路由数据
         /// </summary>
         public RouteData RouteData
         {
-            get {
-                if (_RouteData == null)
-                    _RouteData = ((IRouteable)this).RequestContext.GetRouteData();
-                return _RouteData;
-            }
+            get { return _RequestContext == null ? null : _RequestContext.RouteData; }
         }
 
         /// <summary>
@@ -127,7 +130,11 @@ namespace System.Web
         /// <returns></returns>
         public object GetRouteValue(string name)
         {
-            return ((IRouteable)this).RequestContext.GetRouteValue(name);
+            if (RouteData == null) return null;
+            object value = null;
+            if (RouteData.Values.Count > 0)
+                RouteData.Values.TryGetValue(name, out value);
+            return value;
         }
 
         /// <summary>

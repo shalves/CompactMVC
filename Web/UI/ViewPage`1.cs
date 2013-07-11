@@ -6,6 +6,7 @@
     public class ViewPage<T> : ViewPage
     {
         T _ViewModel;
+
         /// <summary>
         /// 获取当前视图页的页面模型
         /// </summary>
@@ -14,9 +15,9 @@
             get { return _ViewModel; }
         }
 
-        internal override void SetViewModel(object viewModel)
+        internal void SetViewModel(T viewModel)
         {
-            _ViewModel = (T)viewModel;
+            _ViewModel = viewModel;
         }
     }
 }

@@ -16,13 +16,13 @@ namespace System.Json
         /// <returns></returns>
         public static string ValueOf(object arg)
         {
-            if (arg == null) return "null";
+            if (arg == null) return "undefined";
 
             string value = string.Empty;
 
             if (arg is IJson)
             {
-                value = ((IJson)arg).GetJsonString();
+                value = ((IJson)arg).ToString();
             }
             else if (arg is char || arg is string || arg is DateTime)
             {

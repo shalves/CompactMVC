@@ -7,12 +7,10 @@ namespace System.Web.UI
     {
         public override string ToString()
         {
-            if (Count == 0) return string.Empty;
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < Items.Count; i++)
+            foreach (var js in Items)
             {
-                sb.Append(Items[i].ToString());
-                if (i + 1 < Count) sb.AppendLine();
+                sb.AppendLine(js.ToString());
             }
             return sb.ToString();
         }
