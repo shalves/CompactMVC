@@ -1,4 +1,5 @@
 ﻿using System.Web.Routing;
+using System.Web.SessionState;
 
 namespace System.Web
 {
@@ -31,9 +32,12 @@ namespace System.Web
         /// </summary>
         protected void SaveSessionState()
         {
-            bool a, b;
-            SessionState.SessionIDManager sidManager = new SessionState.SessionIDManager();
-            sidManager.SaveSessionID(HttpContext.Current, Context.Session.SessionID, out a, out b);
+            if (Context.Session != null && Context.Session.IsNewSession && !Context.Session.IsCookieless)
+            {
+                Context.Response.Cookies.Remove("ASP.NET_SessionId");
+                bool redirected, cookieAdded;
+                new SessionIDManager().SaveSessionID(HttpContext.Current, Context.Session.SessionID, out redirected, out cookieAdded);
+            }
         }
 
         protected virtual IRouteHandler GetRouteHandler(string handlerToken)
@@ -43,23 +47,23 @@ namespace System.Web
 
         protected virtual void Route(RouteData routeData)
         {
-            //先保存会话状态
             SaveSessionState();
-
-            var reuqestContext = new RequestContext(Context, routeData);
+            
+            var requestContext = new RequestContext(Context, routeData);
 
             //重写请求路径
-            var newPath = routeData.Route.GetVirtualPath(reuqestContext, null).VirtualPath;
-            reuqestContext.HttpContext.RewritePath(newPath);
+            var newPath = routeData.Route.GetVirtualPath(requestContext, null).VirtualPath;
+            requestContext.HttpContext.RewritePath(newPath);
 
             //指定新的处理程序
-            IHttpHandler handler = routeData.RouteHandler.GetHttpHandler(reuqestContext);
-            reuqestContext.HttpContext.Handler = handler;
+            IHttpHandler handler = routeData.RouteHandler.GetHttpHandler(requestContext);
+            requestContext.HttpContext.Handler = handler;
 
             if (handler == null)
                 throw new Exception("未能从指定路由中获取到 IHttpHandler");
 
             handler.ProcessRequest(HttpContext.Current);
+            Context.Response.End();
         }
         
         /// <summary>

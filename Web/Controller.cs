@@ -378,7 +378,7 @@ namespace System.Web
         /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
         protected internal void RenderView(string viewName, object viewModel, bool reserveForm)
         {
-            RenderView(IntegrateView(ViewManager.ResolveView(viewName, viewModel)), reserveForm);
+            RenderView(StuffedView(ViewManager.ResolveView(viewName, viewModel)), reserveForm);
         }
 
         /// <summary>
@@ -411,16 +411,16 @@ namespace System.Web
         /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
         protected internal void RenderView<T>(string viewName, T viewModel, bool reserveForm)
         {
-            RenderView(IntegrateView(ViewManager.ResolveView<T>(viewName, viewModel)), reserveForm);
+            RenderView(StuffedView(ViewManager.ResolveView<T>(viewName, viewModel)), reserveForm);
         }
 
-        ViewPage IntegrateView(ViewPage view)
+        ViewPage StuffedView(ViewPage view)
         {
-            //整合视图数据
+            //合并视图数据
             if (_ViewData != null)
                 view.ViewData.MergeFrom(_ViewData);
 
-            //整合视图脚本
+            //注册视图脚本
             if (_ViewScripts != null)
             {
                 foreach (var script in _ViewScripts)
