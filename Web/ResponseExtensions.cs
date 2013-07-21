@@ -65,6 +65,19 @@ namespace System.Web
         }
 
         /// <summary>
+        /// 输出纯文本到客户端
+        /// </summary>
+        /// <param name="Response"></param>
+        /// <param name="text"></param>
+        public static void WriteText(this HttpResponseBase Response, string text)
+        {
+            Response.ContentType = "text/plain";
+            Response.ContentEncoding = Encoding.UTF8;
+            Response.Write(text);
+            Response.Flush();
+        }
+
+        /// <summary>
         /// 输出JS文本到客户端
         /// </summary>
         /// <param name="Response"></param>

@@ -29,7 +29,7 @@ namespace System.Web.Security
             get { return UserIdentity != null; }
         }
 
-        #region 基于 FormsAuthentication 的静态属性
+        #region 基于静态类型 FormsAuthentication 的属性
         public string DefaultUrl
         {
             get { return FormsAuthentication.DefaultUrl; }

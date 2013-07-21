@@ -9,7 +9,6 @@ namespace System.Web.UI
     [FileLevelControlBuilder(typeof(ViewPageControlBuilder))]
     public class ViewPage : RouteablePage
     {
-        string _Name;
         string _VirtualPath;
         ViewDataDictionary _ViewData;
         object _ViewModel;
@@ -48,14 +47,6 @@ namespace System.Web.UI
         {
             get { return ViewData["$_Meta_Description"].ToString(); }
             set { ViewData["$_Meta_Description"] = value; }
-        }
-
-        /// <summary>
-        /// 获取当前视图页面在映射表中的名称
-        /// </summary>
-        public string Name
-        {
-            get { return _Name; }
         }
 
         /// <summary>
@@ -99,14 +90,9 @@ namespace System.Web.UI
             };
         }
 
-        internal void SetName(string viewName)
+        internal void SetVirtualPath(string path)
         {
-            _Name = viewName;
-        }
-
-        internal void SetVirtualPath(string value)
-        {
-            _VirtualPath = value;
+            _VirtualPath = path;
         }
 
         internal virtual void SetViewModel(object viewModel)

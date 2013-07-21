@@ -64,6 +64,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -127,7 +128,9 @@
     </Compile>
     <Compile Include="Collections\Specialized\NameObjectCollection.cs" />
     <Compile Include="Web\UI\ScriptResourceHelper.cs" />
+    <Compile Include="Web\UI\ViewBuilder.cs" />
     <Compile Include="Web\UI\ViewDataDictionary.cs" />
+    <Compile Include="Web\UI\ViewMappingStore.cs" />
     <Compile Include="Web\UI\ViewMasterPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

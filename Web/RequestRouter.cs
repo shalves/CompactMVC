@@ -35,8 +35,8 @@ namespace System.Web
             if (Context.Session != null && Context.Session.IsNewSession && !Context.Session.IsCookieless)
             {
                 Context.Response.Cookies.Remove("ASP.NET_SessionId");
-                bool redirected, cookieAdded;
-                new SessionIDManager().SaveSessionID(HttpContext.Current, Context.Session.SessionID, out redirected, out cookieAdded);
+                bool redirected, cookieAdded; SessionIDManager sidMgr = new SessionIDManager();
+                sidMgr.SaveSessionID(HttpContext.Current, Context.Session.SessionID, out redirected, out cookieAdded);
             }
         }
 

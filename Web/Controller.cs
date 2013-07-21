@@ -335,83 +335,87 @@ namespace System.Web
 
         #region 呈现视图的方法
         /// <summary>
-        /// 呈现已经在视图集合中注册的默认视图(Action同名)
+        /// 呈现规定路径下与操作方法同名的视图
         /// </summary>
-        protected internal void RenderView()
+        protected void RenderView()
         {
-            RenderView(ControllerContext.ActionName);
+            RenderView(null);
         }
 
         /// <summary>
-        /// 呈现已在视图集合中注册的指定名称的视图
+        /// 优先呈现已在视图集合中映射的指定名称的视图
         /// </summary>
         /// <param name="viewName">视图名称</param>
-        protected internal void RenderView(string viewName)
+        protected void RenderView(string viewName)
         {
             RenderView(viewName, null);
         }
 
         /// <summary>
-        /// 呈现已经在视图集合中注册的默认视图(Action同名)
+        /// 呈现规定路径下与操作方法同名的视图
         /// </summary>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        protected internal void RenderView(object viewModel)
+        protected void RenderView(object viewModel)
         {
-            RenderView(ControllerContext.ActionName, viewModel);
+            RenderView(null, viewModel);
         }
 
         /// <summary>
-        /// 呈现已在视图集合中注册的指定名称的型视图
+        /// 优先呈现已在视图集合中映射的指定名称的视图
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        protected internal void RenderView(string viewName, object viewModel)
+        protected void RenderView(string viewName, object viewModel)
         {
             RenderView(viewName, viewModel, true);
         }
 
         /// <summary>
-        /// 呈现已在视图集合中注册的指定名称的视图
+        /// 优先呈现已在视图集合中映射的指定名称的视图
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
-        protected internal void RenderView(string viewName, object viewModel, bool reserveForm)
+        /// <param name="reserveForm">是否保留原始请求的QueryString和Form集合</param>
+        protected void RenderView(string viewName, object viewModel, bool reserveForm)
         {
-            RenderView(StuffedView(ViewManager.ResolveView(viewName, viewModel)), reserveForm);
+            ViewPage newView = ViewManager.ResolveView(
+                viewName, Name.Substring(0, Name.Length - 10), ControllerContext.ActionName, viewModel);
+            RenderView(StuffedView(newView), reserveForm);
         }
 
         /// <summary>
-        /// 呈现已经在视图集合中注册的默认视图(Action同名)
+        /// 呈现规定路径下与操作方法同名的视图
         /// <para>[强类型]</para>
         /// </summary>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        protected internal void RenderView<T>(T viewModel)
+        protected void RenderView<T>(T viewModel)
         {
-            RenderView<T>(ControllerContext.ActionName, viewModel);
+            RenderView<T>(null, viewModel);
         }
 
         /// <summary>
-        /// 呈现已在视图集合中注册的指定名称的视图
+        /// 优先呈现已在视图集合中映射的指定名称的视图
         /// <para>[强类型]</para>
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        protected internal void RenderView<T>(string viewName, T viewModel)
+        protected void RenderView<T>(string viewName, T viewModel)
         {
             RenderView<T>(viewName, viewModel, true);
         }
 
         /// <summary>
-        /// 呈现已在视图集合中注册的指定名称的视图
+        /// 优先呈现已在视图集合中映射的指定名称的视图
         /// <para>[强类型]</para>
         /// </summary>
         /// <param name="viewName">视图名称</param>
         /// <param name="viewModel">要绑定的视图模型对象</param>
-        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
-        protected internal void RenderView<T>(string viewName, T viewModel, bool reserveForm)
+        /// <param name="reserveForm">是否保留原始请求的QueryString和Form集合</param>
+        protected void RenderView<T>(string viewName, T viewModel, bool reserveForm)
         {
-            RenderView(StuffedView(ViewManager.ResolveView<T>(viewName, viewModel)), reserveForm);
+            ViewPage newView = ViewManager.ResolveView<T>(
+                viewName, Name.Substring(0, Name.Length - 10), ControllerContext.ActionName, viewModel);
+            RenderView(StuffedView(newView), reserveForm);
         }
 
         ViewPage StuffedView(ViewPage view)
@@ -439,7 +443,7 @@ namespace System.Web
         /// 呈现指定的视图实例
         /// </summary>
         /// <param name="view">要呈现的视图</param>
-        /// <param name="reserveForm">是否将原始请求的QueryString和Form集合传给视图</param>
+        /// <param name="reserveForm">是否保留原始请求的QueryString和Form集合</param>
         protected internal void RenderView(ViewPage view, bool reserveForm)
         {
             if (view is IRouteable)
@@ -501,7 +505,7 @@ namespace System.Web
             if (url == null)
                 throw new ArgumentNullException("targetUrl");
 
-            string target = url.Replace("~/", Request.ApplicationPath);
+            string target = url.Replace("~/", Request.ApplicationPath).TrimEnd('?');
 
             if (reserveForm && !string.IsNullOrEmpty(Request.Url.Query))
             {

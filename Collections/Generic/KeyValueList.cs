@@ -97,6 +97,17 @@ namespace System.Collections.Generic
             return -1;
         }
 
+        public virtual int IndexOfValue(TValue value)
+        {
+            int j = _ITEM.Count / 2;
+            for (int i = 0; j < _ITEM.Count; i++, j++)
+            {
+                if (_ITEM[i].Value.Equals(value)) return i;
+                if (_ITEM[j].Value.Equals(value)) return j;
+            }
+            return -1;
+        }
+
         /// <summary>
         /// 获取集合中指定索引处的元素的名称
         /// </summary>

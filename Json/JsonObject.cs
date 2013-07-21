@@ -17,21 +17,23 @@ namespace System.Json
         }
 
         /// <summary>
-        /// 获取对象中指定序号的属性的值
+        /// 获取或设置对象中指定索引处的属性
         /// </summary>
-        /// <param name="i"></param>
-        object this[int i]
+        /// <param name="index"></param>
+        public object this[int index]
         {
-            get { return base.BaseGet(i); }
+            get { return base.BaseGet(index); }
+            set { base.BaseSet(index, value); }
         }
 
         /// <summary>
-        /// 获取对象中指定名称的属性的值
+        /// 获取或设置对象中指定名称的属性的值
         /// </summary>
         /// <param name="name"></param>
-        object this[string name]
+        public object this[string name]
         {
             get { return base.BaseGet(name); }
+            set { base.BaseSet(name, value); }
         }
 
         /// <summary>
@@ -95,6 +97,24 @@ namespace System.Json
             {
                 base.BaseAdd(name, value);
             }
+        }
+
+        /// <summary>
+        /// 移除当前Json对象中指定名称的属性
+        /// </summary>
+        /// <param name="name"></param>
+        public void Remove(string name)
+        {
+            base.BaseRemove(name);
+        }
+
+        /// <summary>
+        /// 移除当前Json对象中指定索引处的属性
+        /// </summary>
+        /// <param name="index"></param>
+        public void RemoveAt(int index)
+        {
+            base.BaseRemoveAt(index);
         }
 
         /// <summary>

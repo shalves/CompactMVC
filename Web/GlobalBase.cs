@@ -2,7 +2,6 @@
 using System.Security.Principal;
 using System.Web.Routing;
 using System.Web.Security;
-using System.Web.UI;
 
 namespace System.Web
 {
@@ -38,12 +37,6 @@ namespace System.Web
         protected abstract void RegisterRoutes(RouteCollection routes);
 
         /// <summary>
-        /// 注册视图
-        /// </summary>
-        /// <param name="views"></param>
-        protected abstract void RegisterViews(NameValueCollection views);
-
-        /// <summary>
         /// 在应用程序启动时执行的代码
         /// </summary>
         /// <param name="sender"></param>
@@ -51,7 +44,6 @@ namespace System.Web
         protected virtual void Application_Start(object sender, EventArgs e)
         {
             RegisterRoutes(RouteTable.Routes);
-            RegisterViews(ViewManager.Views);
         }
 
         /// <summary>

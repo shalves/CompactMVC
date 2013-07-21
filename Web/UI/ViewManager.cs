@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Web.Compilation;
 
 namespace System.Web.UI
 {
@@ -8,95 +7,69 @@ namespace System.Web.UI
     /// </summary>
     public static class ViewManager
     {
-        readonly static NameValueCollection _ViewList;
+        static string _ViewDirectoryPath = "~/Views";
 
         /// <summary>
-        /// 视图名称与视图页面文件路径的集合
+        /// 获取或设置视图文件夹在应用程序中的虚拟路径
+        /// <para>默认值：~/Views</para>
         /// </summary>
-        public static NameValueCollection Views
+        public static string ViewDirectoryPath
         {
-            get { return _ViewList; }
-        }
-
-        static ViewManager()
-        {
-            _ViewList = new NameValueCollection();
+            get { return _ViewDirectoryPath; }
+            set { _ViewDirectoryPath = value; }
         }
 
         /// <summary>
-        /// 转换视图集合中指定名称的普通视图到实例
+        /// 映射新的视图到视图映射表
         /// </summary>
         /// <param name="viewName"></param>
-        /// <returns></returns>
-        public static ViewPage ResolveView(string viewName)
+        /// <param name="viewPath"></param>
+        public static void MapView(string viewName, string viewPath)
         {
-            return ResolveView(viewName, null);
+            ViewMappingStore.ViewMapping.Add(viewName, viewPath);
         }
 
         /// <summary>
-        /// 转换视图集合中指定名称的普通视图到实例，并为视图绑定页面模型
+        /// 映射新的视图到视图映射表
         /// </summary>
-        /// <param name="viewName"></param>
-        /// <param name="viewModel"></param>
-        /// <returns></returns>
-        public static ViewPage ResolveView(string viewName, object viewModel)
+        /// <param name="viewMapping"></param>
+        public static void MapView(NameValueCollection viewMapping)
         {
-            string viewPath = Views[viewName];
+            ViewMappingStore.ViewMapping.Add(viewMapping);
+        }
+
+        public static string GetViewPathByViewName(string viewName)
+        {
+            return ViewMappingStore.ViewMapping[viewName];
+        }
+
+        public static string GetViewPathByConvention(string controllerToken, string actionName)
+        {
+            return string.Format("{0}/{1}/{2}.aspx", ViewDirectoryPath, controllerToken, actionName);
+        }
+
+        public static ViewPage ResolveView(string viewName, string controllerToken, string actionName, object viewModel)
+        {
+            string viewPath = null;
+            if (!string.IsNullOrEmpty(viewName))
+                viewPath = GetViewPathByViewName(viewName);
 
             if (string.IsNullOrEmpty(viewPath))
-                throw new Exception(string.Format("视图 \"{0}\" 不存在", viewName));
-
-            try
-            {
-                ViewPage newView = BuildManager.
-                        CreateInstanceFromVirtualPath(viewPath, typeof(ViewPage)) as ViewPage;
-
-                if (newView == null)
-                    throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
-
-                newView.SetName(viewName);
-                newView.SetVirtualPath(viewPath);
-                newView.SetViewModel(viewModel);
-
-                return newView;
-            }
-            catch
-            {
-                throw;
-            }
+                viewPath = GetViewPathByConvention(controllerToken, actionName);
+            
+            return ViewBuilder.CreateView(viewPath, viewModel);
         }
 
-        /// <summary>
-        /// 转换视图集合中指定名称的强类型视图到实例，并为视图绑定页面模型
-        /// </summary>
-        /// <param name="viewName"></param>
-        /// <param name="viewModel"></param>
-        /// <returns></returns>
-        public static ViewPage<T> ResolveView<T>(string viewName, T viewModel)
+        public static ViewPage<T> ResolveView<T>(string viewName, string controllerToken, string actionName, T viewModel)
         {
-            string viewPath = Views[viewName];
+            string viewPath = null;
+            if (!string.IsNullOrEmpty(viewName))
+                viewPath = GetViewPathByViewName(viewName);
 
             if (string.IsNullOrEmpty(viewPath))
-                throw new Exception(string.Format("视图 \"{0}\" 不存在", viewName));
+                viewPath = GetViewPathByConvention(controllerToken, actionName);
 
-            try
-            {
-                ViewPage<T> newView = BuildManager.
-                        CreateInstanceFromVirtualPath(viewPath, typeof(ViewPage<T>)) as ViewPage<T>;
-
-                if (newView == null)
-                    throw new Exception(string.Format("创建视图 \"{0}\" 失败", viewName));
-
-                newView.SetName(viewName);
-                newView.SetVirtualPath(viewPath);
-                newView.SetViewModel(viewModel);
-
-                return newView;
-            }
-            catch
-            {
-                throw;
-            }
+            return ViewBuilder.CreateView<T>(viewPath, viewModel);
         }
     }
 }

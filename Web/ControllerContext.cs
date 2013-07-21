@@ -65,7 +65,7 @@ namespace System.Web
         }
 
         /// <summary>
-        /// 获取路由参数集合中指定名称的参数的值
+        /// 获取路由数据集合中指定名称的路由参数的值
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>

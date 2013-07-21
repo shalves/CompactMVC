@@ -133,6 +133,7 @@ namespace System.Web
                 actionMethod = ControllerType.GetMethod(ActionName, actionFlags, null, Type.EmptyTypes, null);
                 if (actionMethod == null)
                 {
+                    //尝试获取使用请求类型显式命名的操作方法
                     actionMethod = ControllerType.GetMethod(
                          string.Format("{0}{1}", ActionName, HttpMethod), actionFlags, null, Type.EmptyTypes, null);
                 }
