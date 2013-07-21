@@ -1,4 +1,4 @@
-﻿CompactMVC 1.3.8
+﻿CompactMVC 1.3.9
 ================
 
 CompactMVC 是一个简化版的Web MVC框架，它基于ASP.NET实现，以System程序集补丁的形式封装。可在 3.5 sp1或更新的.NET框架版本下稳定运行。
@@ -17,5 +17,5 @@ CompactMVC 是一个简化版的Web MVC框架，它基于ASP.NET实现，以Syst
 CompactMVC 框架是完全免费、开源的。到目前为止，您可以无限制的下载和使用此框架，且不需要申请任何许可。
 作者非常乐意看到CompactMVC在您的项目中获得验证和改进。
 
-最新版本：1.3.8.23
+最新版本：1.3.9.01
 联系作者：shalves@163.com | QQ：46317239
