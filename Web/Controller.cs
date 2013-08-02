@@ -15,6 +15,7 @@ namespace System.Web
     public abstract class Controller : IController, IHttpHandler, IRequiresSessionState
     {
         readonly string _Name;
+        Type _ThisType;
         HttpContextBase _HttpContext;
         ControllerContext _ControllerContext;
         ViewDataDictionary _ViewData;
@@ -34,6 +35,14 @@ namespace System.Web
         }
         #endregion
 
+        Type ThisType {
+            get {
+                if (_ThisType == null) 
+                    _ThisType = this.GetType();
+                return _ThisType; 
+            }
+        }
+
         #region IController 成员
         /// <summary>
         /// 获取该控制器的名称
@@ -49,12 +58,32 @@ namespace System.Web
             get { return this._ControllerContext; }
         }
 
+        event EventHandler<ControllerAttributeValidateFailedEventArgs> _ControllerAttributeValidateFailed;
+        event EventHandler<ControllerAttributeValidateFailedEventArgs> IController.ControllerAttributeValidateFailed
+        {
+            add { this._ControllerAttributeValidateFailed += value; }
+            remove { this._ControllerAttributeValidateFailed -= value; }
+        }
+
         void IController.Initialize(RequestContext requestContext)
         {
             this._HttpContext = requestContext.HttpContext;
             this._ControllerContext = new ControllerContext(requestContext, this);
             ControllerInitializer.Default.InitializeController(this);
             this.Initialize(requestContext);
+            AttributeBase faildAttribute;
+            if (!ValidateControllerAttributes(out faildAttribute))
+            {
+                var op = OnControllerAttributeValidateFailed(faildAttribute);
+                switch (op.ToDo)
+                {
+                    case DecisiveOperatingInstruction.Operation.Abort: Response.End(); break;
+                    case DecisiveOperatingInstruction.Operation.ThrowException: throw op.ExcpetionToThrow;
+                    case DecisiveOperatingInstruction.Operation.NoOperation: break;
+                }
+                if (this._ControllerAttributeValidateFailed != null)
+                    _ControllerAttributeValidateFailed(this, new ControllerAttributeValidateFailedEventArgs(Name, faildAttribute));
+            }
         }
         #endregion
 
@@ -66,18 +95,18 @@ namespace System.Web
 
         IActionMethodSelector IActionExecutor.ActionSelector { get; set; }
 
-        event EventHandler _PreActionExecute;
-        event EventHandler IActionExecutor.PreActionExecute
-        {
-            add { this._PreActionExecute += value; }
-            remove { this._PreActionExecute -= value; }
-        }
-
         event EventHandler<ActionEventArgs> _ActionNotFound;
         event EventHandler<ActionEventArgs> IActionExecutor.ActionNotFound
         {
             add { this._ActionNotFound += value; }
             remove { this._ActionNotFound -= value; }
+        }
+
+        event EventHandler _PreActionExecute;
+        event EventHandler IActionExecutor.PreActionExecute
+        {
+            add { this._PreActionExecute += value; }
+            remove { this._PreActionExecute -= value; }
         }
 
         event EventHandler<ActionExecutionErrorEventArgs> _ActionExecutionError;
@@ -94,15 +123,15 @@ namespace System.Web
         {
             if (action == null)
             {
-                if (_ActionNotFound != null) _ActionNotFound(this, new ActionEventArgs(Name, ControllerContext.ActionName));
                 var op = OnActionNotFound();
                 switch (op.ToDo)
                 {
                     case DecisiveOperatingInstruction.Operation.Abort: return;
-                    case DecisiveOperatingInstruction.Operation.ThrowException:
-                        throw op.ExcpetionToThrow;
+                    case DecisiveOperatingInstruction.Operation.ThrowException: throw op.ExcpetionToThrow;
                     case DecisiveOperatingInstruction.Operation.NoOperation: break;
                 }
+                if (_ActionNotFound != null) 
+                    _ActionNotFound(this, new ActionEventArgs(Name, ControllerContext.ActionName));
             }
             else
             {
@@ -116,15 +145,15 @@ namespace System.Web
                 }
                 catch (Exception e)
                 {
-                    if (_ActionExecutionError != null) _ActionExecutionError(this, new ActionExecutionErrorEventArgs(Name, ControllerContext.ActionName, e));
                     var op = OnActionExecutionError(e);
                     switch (op.ToDo)
                     {
                         case DecisiveOperatingInstruction.Operation.Abort: return;
-                        case DecisiveOperatingInstruction.Operation.ThrowException:
-                            throw op.ExcpetionToThrow;
+                        case DecisiveOperatingInstruction.Operation.ThrowException: throw op.ExcpetionToThrow;
                         case DecisiveOperatingInstruction.Operation.NoOperation: break;
                     }
+                    if (_ActionExecutionError != null)
+                        _ActionExecutionError(this, new ActionExecutionErrorEventArgs(Name, ControllerContext.ActionName, e));
                     throw e;
                 }
             }
@@ -282,7 +311,7 @@ namespace System.Web
         /// </summary>
         public Controller()
         {
-            this._Name = this.GetType().Name; 
+            this._Name = ThisType.Name; 
         }
 
         /// <summary>
@@ -296,22 +325,75 @@ namespace System.Web
         /// </summary>
         private void OnProcessRequest()
         {
+            //获取操作方法
+            ActionMethodInfo action = ((IActionExecutor)this).ActionSelector.GetActionMethod(ControllerContext);
+
             //调用预置方法
             if (this._PreActionExecute != null)
                 this._PreActionExecute(this, new ActionEventArgs(Name, ControllerContext.ActionName));
             PreActionExecute();
 
-            //获取操作方法
-            ActionMethodInfo action = ((IActionExecutor)this).ActionSelector.GetActionMethod(ControllerContext);
-
             //执行操作方法
             ((IActionExecutor)this).ExecuteAction(action);
         }
 
+        private bool ValidateControllerAttributes(out AttributeBase failedAttribute)
+        {
+            var controllerAttrs = 
+                ThisType.GetCustomAttributes(typeof(AttributeBase), true) as AttributeBase[];
+            foreach (var attr in controllerAttrs)
+            {
+                if (!attr.Validate(Context))
+                {
+                    failedAttribute = attr;
+                    return false;
+                }
+            }
+            failedAttribute = null;
+            return true;
+        }
+
         /// <summary>
-        /// 在执行请求的操作方法之前要执行的操作
+        /// 在控制器的标记验证失败时要执行的操作
         /// </summary>
-        protected virtual void PreActionExecute() { }
+        /// <param name="failedAttribute"></param>
+        /// <returns></returns>
+        protected virtual DecisiveOperatingInstruction OnControllerAttributeValidateFailed(AttributeBase failedAttribute)
+        {
+            if (failedAttribute is AuthenticationAttribute)
+            {
+                if (Request.IsAuthenticated)
+                {
+                    Response.Send403();
+                }
+                else
+                {
+                    Response.Send401();
+                }
+                return DecisiveOperatingInstruction.Abort();
+            }
+            else if (failedAttribute is HttpMethodAttribute)
+            {
+                var httpAttr = failedAttribute as HttpMethodAttribute;
+                if (!string.IsNullOrEmpty(httpAttr.RedirectUrl))
+                {
+                    string url =
+                        httpAttr.ReserveQueryString ? httpAttr.RedirectUrl + Request.Url.Query : httpAttr.RedirectUrl;
+                    Response.Redirect(url);
+                }
+                else
+                {
+                    Response.Send405(httpAttr.Allow);
+                }
+                return DecisiveOperatingInstruction.Abort();
+            }
+            else if (failedAttribute is SecureConnectionAttribute)
+            {
+                return DecisiveOperatingInstruction.ThrowException(new HttpException(
+                    string.Format("只有在使用安全的 HTTP 连接时，才可以请求控制器 \"{0}\" 中的 Action", Name, ControllerContext.ActionName)));
+            }
+            return DecisiveOperatingInstruction.NoOperation();
+        }
 
         /// <summary>
         /// 当请求的操作方法未找到时要执行的操作
@@ -321,6 +403,11 @@ namespace System.Web
             return DecisiveOperatingInstruction.ThrowException(
                 new Exception(string.Format("控制器 \"{0}\" 中不存在名为 \"{1}\" 的 Action", Name, ControllerContext.ActionName)));
         }
+
+        /// <summary>
+        /// 在执行请求的操作方法之前要执行的操作
+        /// </summary>
+        protected virtual void PreActionExecute() { }
 
         /// <summary>
         /// 在执行请求的操作方法出错时要执行的操作

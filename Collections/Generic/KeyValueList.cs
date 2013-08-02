@@ -97,6 +97,11 @@ namespace System.Collections.Generic
             return -1;
         }
 
+        /// <summary>
+        /// 获取具有指定值的元素在集合中的位置
+        /// </summary>
+        /// <param name="value">项的值</param>
+        /// <returns></returns>
         public virtual int IndexOfValue(TValue value)
         {
             int j = _ITEM.Count / 2;

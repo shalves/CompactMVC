@@ -12,14 +12,8 @@ namespace System.Web.UI
         [DefaultValue("")]
         public string TypeName
         {
-            get
-            {
-                return _typeName ?? String.Empty;
-            }
-            set
-            {
-                _typeName = value;
-            }
+            get { return _typeName ?? String.Empty; }
+            set { _typeName = value; }
         }
     }
 }

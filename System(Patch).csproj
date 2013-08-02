@@ -68,6 +68,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Extensions" />
@@ -76,6 +77,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\Generic\DictionaryTree.cs" />
     <Compile Include="Collections\Generic\KeyValueList.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -88,8 +90,8 @@
     <Compile Include="Json\JsonObject.cs" />
     <Compile Include="Json\JsonProperty.cs" />
     <Compile Include="PatchVersion.cs" />
-    <Compile Include="Web\ActionAttribute.cs" />
-    <Compile Include="Web\ActionEventArgs.cs" />
+    <Compile Include="Web\AttributeBase.cs" />
+    <Compile Include="Web\EventArgs.cs" />
     <Compile Include="Web\ActionMethodSelector.cs" />
     <Compile Include="Web\ControllerContext.cs" />
     <Compile Include="Web\ControllerInitializer.cs" />

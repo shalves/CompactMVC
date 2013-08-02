@@ -39,8 +39,7 @@
 
         public static void MapRoute(this RouteCollection routes, string url, string handlerToken)
         {
-            Route route = new Route(url, GetRouteHandler(handlerToken));
-            routes.Add(route);
+            routes.MapRoute(url, handlerToken, new { Action = "Default" });
         }
 
         public static void MapRoute(this RouteCollection routes, string url, string handlerToken, object defaults)
@@ -60,8 +59,7 @@
 
         public static void MapRoute(this RouteCollection routes, string name, string url, string handlerToken)
         {
-            Route route = new Route(url, GetRouteHandler(handlerToken));
-            routes.Add(name, route);
+            routes.MapRoute(name, url, handlerToken, new { Action = "Default" });
         }
 
         public static void MapRoute(this RouteCollection routes, string name, string url, string handlerToken, object defaults)

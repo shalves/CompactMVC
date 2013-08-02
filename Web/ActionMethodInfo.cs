@@ -17,7 +17,7 @@ namespace System.Web
         /// <summary>
         /// 获取为该操作方法定义的Action标记的集合
         /// </summary>
-        public ActionAttribute[] Attributes {
+        public AttributeBase[] Attributes {
             get; private set; 
         }
 
@@ -75,12 +75,12 @@ namespace System.Web
         /// <summary>
         /// 从基本方法信息的实例中获取所有Action标记并为Attributes属性赋值
         /// </summary>
-        private void SetActionAttributes() 
+        private void SetActionAttributes()
         {
-            if (BaseMethod != null) 
+            if (BaseMethod != null)
             {
                 Attributes = 
-                    BaseMethod.GetCustomAttributes(typeof(ActionAttribute), false) as ActionAttribute[];
+                    BaseMethod.GetCustomAttributes(typeof(AttributeBase), true) as AttributeBase[];
             }
         }
     }

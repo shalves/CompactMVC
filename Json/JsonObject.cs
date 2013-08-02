@@ -63,7 +63,7 @@ namespace System.Json
         /// 创建Json对象的实例
         /// </summary>
         /// <param name="quotePropertyName">设置在输出时是否引用属性名</param>
-        /// <param name="anonymous">指定用于初始化JsonObject的匿名对象</param>
+        /// <param name="anonymous">指定用于初始化Json对象的匿名对象</param>
         public JsonObject(bool quotePropertyName, object anonymous)
         {
             this._QuotePropertyName = quotePropertyName;

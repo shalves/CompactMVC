@@ -69,18 +69,26 @@ namespace System.Web
                 ActionSelector.ActionAttributeValidateFailed += 
                     new EventHandler<ActionAttributeValidateFailedEventArgs>(OnActionAttributeValidateFailed);
             }
+            controller.ControllerAttributeValidateFailed += new EventHandler<ControllerAttributeValidateFailedEventArgs>(OnControllerAttributeValidateFailed);
             controller.ActionSelector = ActionSelector;
-            controller.PreActionExecute += new EventHandler(PreActionExecute);
             controller.ActionNotFound += new EventHandler<ActionEventArgs>(OnActionNotFound);
+            controller.PreActionExecute += new EventHandler(PreActionExecute);
             controller.ActionExecutionError += new EventHandler<ActionExecutionErrorEventArgs>(OnActionExecutionError);
         }
 
         /// <summary>
-        /// 在执行请求的操作方法之前要执行的操作
+        /// 在控制器的标记验证失败时要执行的操作
         /// </summary>
         /// <param name="controller"></param>
         /// <param name="e"></param>
-        protected virtual void PreActionExecute(object controller, EventArgs e) { }
+        protected virtual void OnControllerAttributeValidateFailed(object controller, ControllerAttributeValidateFailedEventArgs e) { }
+
+        /// <summary>
+        /// 当请求的操作方法未找到时要执行的操作
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="e"></param>
+        protected virtual void OnActionNotFound(object controller, ActionEventArgs e) { }
 
         /// 当获取的操作方法的Action标记验证失败时要执行的操作
         /// </summary>
@@ -90,11 +98,11 @@ namespace System.Web
         protected virtual void OnActionAttributeValidateFailed(object controller, ActionAttributeValidateFailedEventArgs e) { }
 
         /// <summary>
-        /// 当请求的操作方法未找到时要执行的操作
+        /// 在执行请求的操作方法之前要执行的操作
         /// </summary>
         /// <param name="controller"></param>
         /// <param name="e"></param>
-        protected virtual void OnActionNotFound(object controller, ActionEventArgs e) { }
+        protected virtual void PreActionExecute(object controller, EventArgs e) { }
 
         /// <summary>
         /// 在执行请求的操作方法出错时要执行的操作

@@ -71,7 +71,7 @@ namespace System.Web.Security
             {
                 if (_RedirectUrl == null)
                 {
-                    _RedirectUrl = Request.Params["ReturnUrl"];
+                    _RedirectUrl = HttpUtility.UrlDecode(Request.Params["ReturnUrl"]);
                     if (string.IsNullOrEmpty(_RedirectUrl))
                     {
                         if (Request.UrlReferrer != null && Request.UrlReferrer.AbsolutePath != Request.Url.AbsolutePath)
@@ -146,17 +146,18 @@ namespace System.Web.Security
         /// <param name="userName">用户名</param>
         /// <param name="userData">用户数据（以“,”分隔）</param>
         /// <param name="roles">用户角色（以“,”分隔）</param>
-        /// <param name="expiration">过期时间（分钟）</param>
+        /// <param name="expiration">过期时间（分钟，指定0时使用非持久会话）</param>
         /// <param name="cookiePath">保存Forms认证凭据的Cookie的路径（以“/”开头）</param>
         public void Certificate(
             string userName, string userData, string roles, double expiration, string cookiePath)
         {
             FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(
-                    1, userName, DateTime.Now, DateTime.Now.AddMinutes(expiration), true, string.Format("name={0}&userdata={1}&roles={2}", userName, userData, roles));
+                    1, userName, DateTime.Now, DateTime.Now.AddMinutes(expiration), expiration > 0D, string.Format("name={0}&userdata={1}&roles={2}", userName, userData, roles));
             HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(ticket));
             cookie.Domain = FormsAuthentication.CookieDomain;
             cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
-            cookie.Expires = ticket.Expiration;
+            if (expiration != 0D) cookie.Expires = ticket.Expiration;
+            cookie.HttpOnly = true;
             Response.Cookies.Set(cookie);
             UserIdentity = new FormsIdentity(ticket);
             this._Context.User = new GenericPrincipal(UserIdentity, roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
@@ -169,7 +170,7 @@ namespace System.Web.Security
         /// <param name="userName">用户名</param>
         /// <param name="userData">用户数据（以“,”分隔）</param>
         /// <param name="roles">用户角色（以“,”分隔）</param>
-        /// <param name="expiration">过期时间（分钟）</param>
+        /// <param name="expiration">过期时间（分钟，指定0时使用非持久会话）</param>
         public void Certificate(
             string userName, string userData, string roles, double expiration)
         {
@@ -186,6 +187,7 @@ namespace System.Web.Security
             cookie.Domain = FormsAuthentication.CookieDomain;
             cookie.Path = string.IsNullOrEmpty(cookiePath) ? FormsAuthentication.FormsCookiePath : cookiePath;
             cookie.Expires = DateTime.Now.AddDays(-1D);
+            cookie.HttpOnly = true;
             Response.SetCookie(cookie);
             if (Session != null) Session.Abandon();
             UserIdentity = null; 

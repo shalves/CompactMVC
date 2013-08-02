@@ -30,7 +30,7 @@ namespace System.Web
         /// <summary>
         /// 初始化 ActionMethodSelector 类的新实例
         /// </summary>
-        public ActionMethodSelector() 
+        public ActionMethodSelector()
         {
             this._ActionAttributeValidateFailed = 
                 new EventHandler<ActionAttributeValidateFailedEventArgs>(OnActionAttributeValidateFailed);
@@ -42,15 +42,14 @@ namespace System.Web
         /// <param name="controller"></param>
         /// <param name="e"></param>
         /// <returns></returns>
-        protected virtual void OnActionAttributeValidateFailed(
-            object controller, ActionAttributeValidateFailedEventArgs e)
+        protected virtual void OnActionAttributeValidateFailed(object controller, ActionAttributeValidateFailedEventArgs e)
         {
             var Response = ((IController)controller).ControllerContext.HttpContext.Response;
             var Request = ((IController)controller).ControllerContext.HttpContext.Request;
 
-            if (e.InvalidAttribute is HttpMethodAttribute)
+            if (e.FailedAttribute is HttpMethodAttribute)
             {
-                var httpAttr = e.InvalidAttribute as HttpMethodAttribute;
+                var httpAttr = e.FailedAttribute as HttpMethodAttribute;
                 if (!string.IsNullOrEmpty(httpAttr.RedirectUrl))
                 {
                     string url = 
@@ -62,7 +61,7 @@ namespace System.Web
                     Response.Send405(httpAttr.Allow);
                 }
             }
-            else if (e.InvalidAttribute is AuthenticationAttribute)
+            else if (e.FailedAttribute is AuthenticationAttribute)
             {
                 if (Request.IsAuthenticated)
                 {
@@ -73,10 +72,10 @@ namespace System.Web
                     Response.Send401();
                 }
             }
-            else if (e.InvalidAttribute is SecureConnectionAttribute)
+            else if (e.FailedAttribute is SecureConnectionAttribute)
             {
                 throw new HttpException(
-                    string.Format("只有在使用安全的HTTP连接时，才可以请求控制器 \"{0}\" 的 \"{1}\" Action", e.ControllerName, e.ActionName));
+                    string.Format("只有在使用安全的 HTTP 连接时，才可以请求控制器 \"{0}\" 中的 \"{1}\" Action", e.ControllerName, e.ActionName));
             }
         }
 

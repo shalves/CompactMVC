@@ -3,20 +3,12 @@
 namespace System.Web
 {
     /// <summary>
-    /// 操作方法（Action）的 Authentication 标记类
-    /// <para>用于限制只有特定的认证用户才可以请求被标记的Action</para>
+    /// 为控制器和操作方法提供认证标记设置
+    /// <para>用于限制只有特定的认证用户才可以请求被标记的控制器或操作方法</para>
     /// </summary>
-    public sealed class AuthenticationAttribute : ActionAttribute
+    public sealed class AuthenticationAttribute : AttributeBase
     {
         string[] _Roles = new string[] { "*" };
-
-        /// <summary>
-        /// 表示被标记的方法能够接受的用户角色类型的数组
-        /// </summary>
-        public string[] Roles 
-        {
-            get { return _Roles; }
-        }
 
         public override bool IsFatalError
         {
@@ -24,21 +16,29 @@ namespace System.Web
         }
 
         /// <summary>
-        /// 声明只有认证的用户才可以请求该Action
+        /// 表示被标记的控制器或操作方法允许的用户角色类型的数组
+        /// </summary>
+        public string[] Roles 
+        {
+            get { return _Roles; }
+        }
+
+        /// <summary>
+        /// 声明只有经过认证的用户才可以请求该控制器或操作方法
         /// </summary>
         public AuthenticationAttribute() { }
 
         /// <summary>
-        /// 声明只有指定角色的认证用户才可以请求该Action
+        /// 声明只有经过认证的用户才可以请求该控制器或操作方法
         /// </summary>
-        /// <param name="roles"></param>
+        /// <param name="roles">指定控制器或操作方法允许的用户角色类型的数组</param>
         public AuthenticationAttribute(params string[] roles)
         {
             this._Roles = roles;
         }
 
         /// <summary>
-        /// 使用该Authentication标记设置验证当前Http请求
+        /// 使用该Authentication标记设置验证当前HTTP 请求
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>

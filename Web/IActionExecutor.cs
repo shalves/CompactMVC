@@ -22,14 +22,14 @@
         void ExecuteAction(ActionMethodInfo action);
 
         /// <summary>
-        /// 在当前请求的操作方法被执行前引发的事件
-        /// </summary>
-        event EventHandler PreActionExecute;
-
-        /// <summary>
         /// 在当前请求的操作方法未找时引发的事件
         /// </summary>
         event EventHandler<ActionEventArgs> ActionNotFound;
+
+        /// <summary>
+        /// 在当前请求的操作方法被执行前引发的事件
+        /// </summary>
+        event EventHandler PreActionExecute;
 
         /// <summary>
         /// 在当前请求的操作方法执行出错时引发的事件

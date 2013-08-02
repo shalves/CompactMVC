@@ -10,7 +10,7 @@ namespace System.Web
     /// </summary>
     public abstract class GlobalBase : HttpApplication
     {
-        bool TryGetCurrentUser(out IPrincipal user)
+        private bool TryGetCurrentUser(out IPrincipal user)
         {
             user = null;
             HttpCookie hc = Request.Cookies[FormsAuthentication.FormsCookieName];
@@ -22,6 +22,7 @@ namespace System.Web
                 NameValueCollection userData = HttpUtility.ParseQueryString(ticket.UserData);
                 string[] userRoles = userData["roles"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 user = new GenericPrincipal(formsID, userRoles);
+                Request.Cookies.Remove(FormsAuthentication.FormsCookieName);
                 return true;
             }
             catch
@@ -94,6 +95,39 @@ namespace System.Web
         /// <param name="e"></param>
         protected virtual void Application_PreSendRequestContent(object sender, EventArgs e)
         {
+        }
+
+        /// <summary>
+        /// 在向客户端发送Http标头之前执行的代码
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void Application_PreSendRequestHeaders(object sender, EventArgs e)
+        {
+            if (Response.StatusCode.Equals(401))
+            {
+                Response.Redirect(GetLoginUrl(), false);
+            }
+        }
+
+        /// <summary>
+        /// 获取可为当前请求创建认证的登录Url
+        /// </summary>
+        /// <returns></returns>
+        private string GetLoginUrl()
+        {
+            string encodedReturnUrl = HttpUtility.UrlEncode(Request.RawUrl);
+            string loginUrl = FormsAuthentication.LoginUrl.TrimEnd('?');
+            if (string.IsNullOrEmpty(loginUrl)) loginUrl = "/Login";
+            if (loginUrl.IndexOf('?') > 0)
+            {
+                if (loginUrl.IndexOf("ReturnUrl") > 0) return loginUrl;
+                return string.Format("{0}&ReturnUrl={1}", loginUrl, encodedReturnUrl);
+            }
+            else
+            {
+                return string.Format("{0}?ReturnUrl={1}", loginUrl, encodedReturnUrl);
+            }
         }
 
         /// <summary>
