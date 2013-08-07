@@ -8,7 +8,7 @@ namespace System.Json
     /// </summary>
     public sealed class JsonArray : List<object>, IJson
     {
-        bool _QuotePropertyName = false;
+        bool _QuotePropertyName = true;
 
         bool IJson.QuotePropertyName
         {

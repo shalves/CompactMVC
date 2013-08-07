@@ -47,8 +47,7 @@ namespace System.Web
         /// </summary>
         /// <param name="baseMethod"></param>
         /// <param name="name"></param>
-        public ActionMethodInfo(MethodInfo baseMethod, string name)
-        {
+        public ActionMethodInfo(MethodInfo baseMethod, string name) {
             BaseMethod = baseMethod;
             Name = name;
             ParameterTypes = Type.EmptyTypes;

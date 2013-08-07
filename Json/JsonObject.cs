@@ -9,7 +9,7 @@ namespace System.Json
     /// </summary>
     public sealed class JsonObject : NameObjectCollectionBase, IJson
     {
-        bool _QuotePropertyName = false;
+        bool _QuotePropertyName = true;
         bool IJson.QuotePropertyName
         {
             get { return this._QuotePropertyName; }
@@ -129,7 +129,7 @@ namespace System.Json
             for (int i = 0; i < Count; i++)
             {
                 sb.Append(", ");
-                if (this[i] is IJson) 
+                if (this[i] is IJson)
                 {
                     ((IJson)this[i]).QuotePropertyName = this._QuotePropertyName;
                 }

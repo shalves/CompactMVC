@@ -12,6 +12,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("zh-CN")]
 [assembly: ComVisible(false)]
 [assembly: Guid("03beaefc-6687-4fce-bf74-2d25647fb91e")]
-[assembly: AssemblyVersion("1.3.9.12")]
-[assembly: AssemblyFileVersion("1.3.9.12")]
+[assembly: AssemblyVersion("1.3.9.15")]
+[assembly: AssemblyFileVersion("1.3.9.15")]
 [assembly: NeutralResourcesLanguageAttribute("zh-CN")]
