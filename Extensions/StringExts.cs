@@ -45,16 +45,9 @@ namespace System.Extensions
         /// <param name="array"></param>
         /// <param name="sparator">指定的分隔符</param>
         /// <returns></returns>
-        public static string Merge(this string[] array, char sparator)
+        public static string Join(this string[] array, string sparator)
         {
-            if (array == null || array.Length == 0) return string.Empty;
-            StringBuilder sb = new StringBuilder();
-            foreach (string str in array)
-            {
-                sb.Append(sparator);
-                sb.Append(str);
-            }
-            return sb.Remove(0, 1).ToString();
+            return string.Join(sparator, array);
         }
 
         /// <summary>
@@ -92,7 +85,6 @@ namespace System.Extensions
             if (string.IsNullOrEmpty(arg)) return "";
 
             return arg.
-                Replace(@"\", @"\\").
                 Replace("\'", "\\\'").
                 Replace("\"", "\\\"");
         }
